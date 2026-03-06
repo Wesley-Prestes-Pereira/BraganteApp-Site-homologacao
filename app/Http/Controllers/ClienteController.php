@@ -3,10 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Models\Cliente;
-use \App\Exports\ClientesExport;
-use \Maatwebsite\Excel\Facades\Excel;
+use App\Exports\ClientesExport;
+use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Http\{JsonResponse, Request};
-
 
 class ClienteController extends Controller
 {
@@ -51,7 +50,8 @@ class ClienteController extends Controller
         $clientes = Cliente::where('ativo', true)
             ->where(function ($q) use ($termo) {
                 $q->where('nome', 'like', $termo)
-                    ->orWhere('telefone', 'like', $termo);
+                    ->orWhere('telefone', 'like', $termo)
+                    ->orWhere('email', 'like', $termo);
             })
             ->orderBy('nome')
             ->limit(15)
@@ -64,11 +64,19 @@ class ClienteController extends Controller
     {
         $validated = $request->validate([
             'nome'     => 'required|string|max:191',
-            'telefone' => 'nullable|string|max:191',
+            'telefone' => 'nullable|string|max:20',
             'email'    => 'nullable|email|max:191',
-            'cpf'      => 'nullable|string|max:14|unique:clientes,cpf',
+            'cpf'      => ['nullable', 'string', 'max:14', 'unique:clientes,cpf', 'regex:/^\d{3}\.?\d{3}\.?\d{3}-?\d{2}$/'],
             'obs'      => 'nullable|string|max:1000',
         ]);
+
+        if (isset($validated['cpf'])) {
+            $validated['cpf'] = preg_replace('/[^\d]/', '', $validated['cpf']);
+            $validated['cpf'] = substr($validated['cpf'], 0, 3) . '.'
+                . substr($validated['cpf'], 3, 3) . '.'
+                . substr($validated['cpf'], 6, 3) . '-'
+                . substr($validated['cpf'], 9, 2);
+        }
 
         return response()->json(Cliente::create($validated), 201);
     }
@@ -79,11 +87,19 @@ class ClienteController extends Controller
 
         $validated = $request->validate([
             'nome'     => 'sometimes|string|max:191',
-            'telefone' => 'nullable|string|max:191',
+            'telefone' => 'nullable|string|max:20',
             'email'    => 'nullable|email|max:191',
-            'cpf'      => "nullable|string|max:14|unique:clientes,cpf,{$cliente->id}",
+            'cpf'      => ['nullable', 'string', 'max:14', "unique:clientes,cpf,{$cliente->id}", 'regex:/^\d{3}\.?\d{3}\.?\d{3}-?\d{2}$/'],
             'obs'      => 'nullable|string|max:1000',
         ]);
+
+        if (isset($validated['cpf'])) {
+            $validated['cpf'] = preg_replace('/[^\d]/', '', $validated['cpf']);
+            $validated['cpf'] = substr($validated['cpf'], 0, 3) . '.'
+                . substr($validated['cpf'], 3, 3) . '.'
+                . substr($validated['cpf'], 6, 3) . '-'
+                . substr($validated['cpf'], 9, 2);
+        }
 
         $cliente->update($validated);
 
@@ -115,7 +131,6 @@ class ClienteController extends Controller
 
         return response()->json(['message' => 'Cliente excluído']);
     }
-
 
     public function exportarXlsx(Request $request)
     {

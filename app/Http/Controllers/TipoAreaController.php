@@ -62,13 +62,13 @@ class TipoAreaController extends Controller
 
         DB::transaction(function () use ($tipo) {
             $tipo->areas()->withTrashed()->each(function ($area) {
-                $area->horariosConfig()->withTrashed()->forceDelete();
+                $area->horariosConfig()->delete();
                 $area->diasDisponiveis()->delete();
                 $area->areaTaxas()->delete();
-                $area->valores()->withTrashed()->forceDelete();
-                $area->forceDelete();
+                $area->valores()->delete();
+                $area->delete();
             });
-            $tipo->forceDelete();
+            $tipo->delete();
         });
 
         return response()->json(['message' => 'Tipo de área excluído']);
@@ -77,7 +77,15 @@ class TipoAreaController extends Controller
     public function restore(int $id): JsonResponse
     {
         $tipo = TipoArea::onlyTrashed()->findOrFail($id);
-        $tipo->restore();
+
+        DB::transaction(function () use ($tipo) {
+            $tipo->restore();
+            $tipo->areas()->onlyTrashed()->each(function ($area) {
+                $area->restore();
+                $area->horariosConfig()->onlyTrashed()->restore();
+                $area->valores()->onlyTrashed()->restore();
+            });
+        });
 
         return response()->json(['message' => 'Tipo de área restaurado']);
     }

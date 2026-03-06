@@ -50,9 +50,18 @@ class TaxaController extends Controller
             'tipo_cobranca' => 'sometimes|in:FIXO,PERCENTUAL',
         ]);
 
-        if ($taxa->temVinculo() && isset($validated['valor']) && (float) $validated['valor'] !== (float) $taxa->valor) {
+        $valorMudou = isset($validated['valor'])
+            && (float) $validated['valor'] !== (float) $taxa->valor;
+
+        $tipoCobrancaMudou = isset($validated['tipo_cobranca'])
+            && $validated['tipo_cobranca'] !== $taxa->tipo_cobranca;
+
+        if ($taxa->temVinculo() && ($valorMudou || $tipoCobrancaMudou)) {
             $taxa->update(['ativo' => false]);
-            $novaTaxa = Taxa::create(array_merge($taxa->only(['nome', 'tipo_cobranca']), $validated));
+            $novaTaxa = Taxa::create(array_merge(
+                $taxa->only(['nome', 'valor', 'tipo_cobranca']),
+                $validated,
+            ));
             return response()->json($novaTaxa);
         }
 

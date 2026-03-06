@@ -78,7 +78,7 @@ class Reserva extends Model implements AuditableContract
 
     public function temVinculo(): bool
     {
-        return $this->pagamentos()->withTrashed()->exists()
+        return $this->pagamentos()->exists()
             || $this->reservaTaxas()->exists();
     }
 

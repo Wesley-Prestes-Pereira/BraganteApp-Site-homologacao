@@ -52,6 +52,12 @@ class UsuarioController extends Controller
             'permissions.*' => 'exists:permissions,name',
         ]);
 
+        if ($validated['role'] === 'admin' && !Auth::user()->hasRole('admin')) {
+            return response()->json([
+                'message' => 'Apenas administradores podem atribuir o perfil de administrador.',
+            ], 403);
+        }
+
         $user = User::create([
             'name'     => $validated['name'],
             'email'    => $validated['email'],
@@ -78,6 +84,35 @@ class UsuarioController extends Controller
             'permissions.*' => 'exists:permissions,name',
         ]);
 
+        if (isset($validated['role'])) {
+            if ($validated['role'] === 'admin' && !Auth::user()->hasRole('admin')) {
+                return response()->json([
+                    'message' => 'Apenas administradores podem atribuir o perfil de administrador.',
+                ], 403);
+            }
+
+            if (
+                $usuario->id === Auth::id()
+                && $usuario->hasRole('admin')
+                && $validated['role'] !== 'admin'
+                && User::role('admin')->count() <= 1
+            ) {
+                return response()->json([
+                    'message' => 'Você é o único administrador e não pode rebaixar seu próprio perfil.',
+                ], 422);
+            }
+
+            if (
+                $usuario->hasRole('admin')
+                && $validated['role'] !== 'admin'
+                && !Auth::user()->hasRole('admin')
+            ) {
+                return response()->json([
+                    'message' => 'Apenas administradores podem alterar o perfil de outro administrador.',
+                ], 403);
+            }
+        }
+
         if (isset($validated['password']) && $validated['password']) {
             $usuario->update(collect($validated)->only(['name', 'email', 'password'])->toArray());
         } else {
@@ -99,6 +134,10 @@ class UsuarioController extends Controller
     {
         if ($usuario->id === Auth::id()) {
             return response()->json(['message' => 'Você não pode excluir sua própria conta.'], 422);
+        }
+
+        if ($usuario->hasRole('admin') && !Auth::user()->hasRole('admin')) {
+            return response()->json(['message' => 'Apenas administradores podem excluir outro administrador.'], 403);
         }
 
         if ($usuario->hasRole('admin') && User::role('admin')->count() <= 1) {

@@ -6,7 +6,7 @@ use Carbon\Carbon;
 use Dompdf\Dompdf;
 use App\Exports\ReservasExport;
 use App\Models\{Area, Cliente, Reserva, TipoArea};
-use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\{Cache, DB};
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Maatwebsite\Excel\Facades\Excel;
@@ -99,12 +99,21 @@ class ReservaController extends Controller
         $validated = $this->validarReserva($request, true);
         $this->ajustarDatasPorTipo($validated);
         $this->validarAreaAtiva($validated['area_id']);
+        $this->validarClienteAtivo($validated['cliente_id']);
         $this->validarDiaArea($validated);
         $this->validarHorariosArea($validated);
-        $this->verificarConflito($validated);
-        $this->preencherValores($validated);
 
-        $reserva = Reserva::create($validated);
+        $reserva = DB::transaction(function () use ($validated) {
+            Reserva::where('area_id', $validated['area_id'])
+                ->where('dia_semana', $validated['dia_semana'])
+                ->lockForUpdate()
+                ->get();
+
+            $this->verificarConflito($validated);
+            $this->preencherValores($validated);
+
+            return Reserva::create($validated);
+        });
 
         return response()->json($reserva->load(['cliente', 'area']), 201);
     }
@@ -117,6 +126,10 @@ class ReservaController extends Controller
 
         $areaId = $validated['area_id'] ?? $reserva->area_id;
         $this->validarAreaAtiva($areaId);
+
+        if (isset($validated['cliente_id'])) {
+            $this->validarClienteAtivo($validated['cliente_id']);
+        }
 
         $merged = array_merge($reserva->only([
             'area_id',
@@ -132,9 +145,20 @@ class ReservaController extends Controller
 
         $this->validarDiaArea($merged);
         $this->validarHorariosArea($merged);
-        $this->verificarConflito($merged, $reserva->id);
 
-        $reserva->update($validated);
+        $reserva = DB::transaction(function () use ($reserva, $validated, $merged) {
+            Reserva::where('area_id', $merged['area_id'])
+                ->where('dia_semana', $merged['dia_semana'])
+                ->lockForUpdate()
+                ->get();
+
+            $this->verificarConflito($merged, $reserva->id);
+            $this->preencherValores($validated);
+
+            $reserva->update($validated);
+
+            return $reserva;
+        });
 
         return response()->json($reserva->load(['cliente', 'area']));
     }
@@ -165,7 +189,7 @@ class ReservaController extends Controller
             'data_reserva'   => 'nullable|date',
             'data_inicio'    => 'nullable|date',
             'data_fim'       => 'nullable|date',
-            'reserva_id'     => 'nullable|integer',
+            'reserva_id'     => 'nullable|integer|exists:reservas,id',
         ]);
 
         $conflitos = $this->buscarConflitos($validated, $validated['reserva_id'] ?? null);
@@ -212,26 +236,23 @@ class ReservaController extends Controller
         $regra = $obrigatorio ? 'required' : 'sometimes';
 
         return $request->validate([
-            'area_id'        => "{$regra}|exists:areas,id",
-            'cliente_id'     => "{$regra}|exists:clientes,id",
-            'dia_semana'     => "{$regra}|in:DOMINGO,SEGUNDA,TERCA,QUARTA,QUINTA,SEXTA,SABADO",
-            'tipo'           => "{$regra}|in:FIXA,UNICA,MENSALISTA",
-            'horario_inicio' => 'nullable|date_format:H:i',
-            'horario_fim'    => 'nullable|date_format:H:i',
-            'slots_ocupados' => 'nullable|integer|min:1|max:24',
+            'area_id'          => "{$regra}|exists:areas,id",
+            'cliente_id'       => "{$regra}|exists:clientes,id",
+            'dia_semana'       => "{$regra}|in:DOMINGO,SEGUNDA,TERCA,QUARTA,QUINTA,SEXTA,SABADO",
+            'tipo'             => "{$regra}|in:FIXA,UNICA,MENSALISTA",
+            'horario_inicio'   => 'nullable|date_format:H:i',
+            'horario_fim'      => 'nullable|date_format:H:i',
+            'slots_ocupados'   => 'nullable|integer|min:1|max:24',
             'duracao_real_min' => 'nullable|integer|min:1|max:1440',
-            'data_reserva'   => 'nullable|required_if:tipo,UNICA|date',
-            'data_inicio'    => 'nullable|date',
-            'data_fim'       => 'nullable|date|after_or_equal:data_inicio',
-            'valor_unitario' => 'nullable|numeric|min:0|max:99999.99',
-            'valor_total'    => 'nullable|numeric|min:0|max:999999.99',
-            'valor_taxas'    => 'nullable|numeric|min:0|max:99999.99',
-            'desconto'       => 'nullable|numeric|min:0|max:99999.99',
-            'valor_final'    => 'nullable|numeric|min:0|max:999999.99',
-            'num_pessoas'    => 'nullable|integer|min:1|max:9999',
-            'hora_entrada'   => 'nullable|date_format:H:i',
-            'hora_saida'     => 'nullable|date_format:H:i',
-            'obs'            => 'nullable|string|max:1000',
+            'data_reserva'     => 'required_if:tipo,UNICA|nullable|date',
+            'data_inicio'      => 'nullable|date',
+            'data_fim'         => 'nullable|date|after_or_equal:data_inicio',
+            'valor_unitario'   => 'nullable|numeric|min:0|max:99999.99',
+            'desconto'         => 'nullable|numeric|min:0|max:99999.99',
+            'num_pessoas'      => 'nullable|integer|min:1|max:9999',
+            'hora_entrada'     => 'nullable|date_format:H:i',
+            'hora_saida'       => 'nullable|date_format:H:i',
+            'obs'              => 'nullable|string|max:1000',
         ], [
             'data_reserva.required_if' => 'A data da reserva é obrigatória para reservas únicas.',
         ]);
@@ -252,6 +273,17 @@ class ReservaController extends Controller
         if (!$area || !$area->ativo) {
             throw ValidationException::withMessages([
                 'area_id' => 'Esta área está desativada e não aceita novas reservas.',
+            ]);
+        }
+    }
+
+    private function validarClienteAtivo(int $clienteId): void
+    {
+        $cliente = Cliente::findCached($clienteId);
+
+        if (!$cliente || !$cliente->ativo) {
+            throw ValidationException::withMessages([
+                'cliente_id' => 'Este cliente está desativado e não pode receber novas reservas.',
             ]);
         }
     }
@@ -293,10 +325,10 @@ class ReservaController extends Controller
         }
 
         if (!empty($dados['horario_fim']) && ($dados['slots_ocupados'] ?? 1) > 1) {
-            $fim = substr($dados['horario_fim'], 0, 5);
             $inicioIdx = array_search($inicio, $horariosDisponiveis);
+            $slotsNecessarios = $dados['slots_ocupados'] ?? 1;
 
-            for ($i = $inicioIdx; $i < $inicioIdx + ($dados['slots_ocupados'] ?? 1) && $i < count($horariosDisponiveis); $i++) {
+            for ($i = $inicioIdx; $i < $inicioIdx + $slotsNecessarios; $i++) {
                 if (!isset($horariosDisponiveis[$i])) {
                     throw ValidationException::withMessages([
                         'horario_fim' => "Não há slots suficientes disponíveis para o período solicitado em \"{$area->nome}\".",
@@ -350,9 +382,13 @@ class ReservaController extends Controller
                 $q->where(function ($r) use ($inicio, $fim) {
                     $r->where('horario_inicio', '<', $fim)
                         ->where('horario_fim', '>', $inicio);
+                })->orWhere(function ($r) use ($inicio) {
+                    $r->where('horario_inicio', $inicio)
+                        ->whereNull('horario_fim');
                 })->orWhere(function ($r) use ($inicio, $fim) {
                     $r->where('horario_inicio', '>=', $inicio)
-                        ->where('horario_inicio', '<', $fim);
+                        ->where('horario_inicio', '<', $fim)
+                        ->whereNull('horario_fim');
                 });
             });
         } else {
@@ -417,16 +453,14 @@ class ReservaController extends Controller
         $slots = $dados['slots_ocupados'] ?? 1;
         $unitario = $dados['valor_unitario'] ?? null;
 
-        if ($unitario && !isset($dados['valor_total'])) {
+        if ($unitario) {
             $dados['valor_total'] = $unitario * $slots;
         }
 
-        if (!isset($dados['valor_final'])) {
-            $total = $dados['valor_total'] ?? 0;
-            $taxas = $dados['valor_taxas'] ?? 0;
-            $desconto = $dados['desconto'] ?? 0;
-            $dados['valor_final'] = $total + $taxas - $desconto;
-        }
+        $total = $dados['valor_total'] ?? 0;
+        $taxas = $dados['valor_taxas'] ?? 0;
+        $desconto = $dados['desconto'] ?? 0;
+        $dados['valor_final'] = $total + $taxas - $desconto;
 
         if ($area->modo_reserva === 'DIA_INTEIRO') {
             $dados['horario_inicio'] = null;

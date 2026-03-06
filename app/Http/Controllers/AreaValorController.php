@@ -9,10 +9,15 @@ class AreaValorController extends Controller
 {
     public function index(Request $request): JsonResponse
     {
+        $request->validate([
+            'area_id' => 'nullable|integer|exists:areas,id',
+            'ativo'   => 'nullable|boolean',
+        ]);
+
         $query = AreaValor::with(['area' => fn($q) => $q->withTrashed()]);
 
         if ($request->filled('area_id')) {
-            $query->where('area_id', $request->area_id);
+            $query->where('area_id', $request->integer('area_id'));
         }
 
         if ($request->filled('ativo')) {
@@ -49,10 +54,16 @@ class AreaValorController extends Controller
             'descricao'     => 'nullable|string|max:500',
         ]);
 
-        if ($areaValor->temVinculo() && isset($validated['valor']) && (float) $validated['valor'] !== (float) $areaValor->valor) {
+        $valorMudou = isset($validated['valor'])
+            && (float) $validated['valor'] !== (float) $areaValor->valor;
+
+        $modoCobrancaMudou = isset($validated['modo_cobranca'])
+            && $validated['modo_cobranca'] !== $areaValor->modo_cobranca;
+
+        if ($areaValor->temVinculo() && ($valorMudou || $modoCobrancaMudou)) {
             $areaValor->update(['ativo' => false]);
             $novoValor = AreaValor::create(array_merge(
-                $areaValor->only(['area_id', 'tipo_reserva', 'modo_cobranca', 'dia_semana', 'descricao']),
+                $areaValor->only(['area_id', 'tipo_reserva', 'modo_cobranca', 'valor', 'dia_semana', 'descricao']),
                 $validated,
             ));
             return response()->json($novoValor);

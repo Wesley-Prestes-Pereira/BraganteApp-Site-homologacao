@@ -9,38 +9,22 @@ class PagamentoController extends Controller
 {
     public function index(Request $request)
     {
+        $request->validate([
+            'cliente_id'     => 'nullable|integer|exists:clientes,id',
+            'status'         => 'nullable|in:PENDENTE,PAGO,ATRASADO,CANCELADO',
+            'tipo'           => 'nullable|in:PAGAMENTO,CREDITO,DEBITO',
+            'referencia_mes' => 'nullable|string|regex:/^\d{4}-\d{2}$/',
+            'data_inicio'    => 'nullable|date',
+            'data_fim'       => 'nullable|date|after_or_equal:data_inicio',
+            'busca'          => 'nullable|string|max:191',
+        ]);
+
         $query = Pagamento::with([
             'cliente' => fn($q) => $q->withTrashed(),
             'reserva' => fn($q) => $q->withTrashed(),
         ]);
 
-        if ($request->filled('cliente_id')) {
-            $query->where('cliente_id', $request->cliente_id);
-        }
-
-        if ($request->filled('status')) {
-            $query->where('status', $request->status);
-        }
-
-        if ($request->filled('tipo')) {
-            $query->where('tipo', $request->tipo);
-        }
-
-        if ($request->filled('referencia_mes')) {
-            $query->where('referencia_mes', $request->referencia_mes);
-        }
-
-        if ($request->filled('data_inicio') && $request->filled('data_fim')) {
-            $query->whereBetween('created_at', [$request->data_inicio, $request->data_fim . ' 23:59:59']);
-        }
-
-        if ($request->filled('busca')) {
-            $termo = '%' . str_replace(['%', '_'], ['\\%', '\\_'], $request->busca) . '%';
-            $query->where(function ($q) use ($termo) {
-                $q->where('obs', 'like', $termo)
-                    ->orWhereHas('cliente', fn($c) => $c->where('nome', 'like', $termo));
-            });
-        }
+        $this->aplicarFiltros($query, $request);
 
         $query->orderByDesc('created_at');
 
@@ -50,11 +34,14 @@ class PagamentoController extends Controller
 
         $pagamentos = $query->paginate(30);
 
+        $statsQuery = Pagamento::query();
+        $this->aplicarFiltros($statsQuery, $request);
+
         $stats = [
-            'total_pago'     => Pagamento::where('status', 'PAGO')->where('tipo', 'PAGAMENTO')->sum('valor'),
-            'total_pendente' => Pagamento::where('status', 'PENDENTE')->sum('valor'),
-            'total_creditos' => Pagamento::where('tipo', 'CREDITO')->where('status', 'PAGO')->sum('valor'),
-            'total_debitos'  => Pagamento::where('tipo', 'DEBITO')->where('status', 'PENDENTE')->sum('valor'),
+            'total_pago'     => (clone $statsQuery)->where('status', 'PAGO')->where('tipo', 'PAGAMENTO')->sum('valor'),
+            'total_pendente' => (clone $statsQuery)->where('status', 'PENDENTE')->sum('valor'),
+            'total_creditos' => (clone $statsQuery)->where('tipo', 'CREDITO')->where('status', 'PAGO')->sum('valor'),
+            'total_debitos'  => (clone $statsQuery)->where('tipo', 'DEBITO')->where('status', 'PENDENTE')->sum('valor'),
         ];
 
         return view('pagamentos.index', [
@@ -79,6 +66,14 @@ class PagamentoController extends Controller
             'obs'              => 'nullable|string|max:1000',
         ]);
 
+        $cliente = Cliente::find($validated['cliente_id']);
+        if (!$cliente || !$cliente->ativo) {
+            return response()->json([
+                'message' => 'Este cliente está desativado.',
+                'errors'  => ['cliente_id' => ['Este cliente está desativado e não pode receber novos registros financeiros.']],
+            ], 422);
+        }
+
         return response()->json(Pagamento::create($validated), 201);
     }
 
@@ -99,11 +94,26 @@ class PagamentoController extends Controller
             'obs'              => 'nullable|string|max:1000',
         ]);
 
+        if (isset($validated['cliente_id']) && (int) $validated['cliente_id'] !== $pagamento->cliente_id) {
+            if ($pagamento->reserva_id) {
+                return response()->json([
+                    'message' => 'Não é possível alterar o cliente de um pagamento vinculado a uma reserva.',
+                ], 422);
+            }
+
+            $novoCliente = Cliente::find($validated['cliente_id']);
+            if (!$novoCliente || !$novoCliente->ativo) {
+                return response()->json([
+                    'message' => 'O cliente de destino está desativado.',
+                    'errors'  => ['cliente_id' => ['O cliente de destino está desativado.']],
+                ], 422);
+            }
+        }
+
         $pagamento->update($validated);
 
         return response()->json($pagamento);
     }
-
 
     public function exportarXlsx(Request $request)
     {
@@ -112,10 +122,7 @@ class PagamentoController extends Controller
             'reserva' => fn($q) => $q->withTrashed()->with(['area' => fn($q2) => $q2->withTrashed()]),
         ]);
 
-        if ($request->filled('cliente_id')) $query->where('cliente_id', $request->cliente_id);
-        if ($request->filled('status')) $query->where('status', $request->status);
-        if ($request->filled('tipo')) $query->where('tipo', $request->tipo);
-        if ($request->filled('referencia_mes')) $query->where('referencia_mes', $request->referencia_mes);
+        $this->aplicarFiltros($query, $request);
 
         $query->orderByDesc('created_at');
 
@@ -128,6 +135,19 @@ class PagamentoController extends Controller
     public function destroy(int $id): JsonResponse
     {
         $pagamento = Pagamento::findOrFail($id);
+
+        if ($pagamento->status === 'PAGO' && $pagamento->reserva_id) {
+            $reservaAtiva = $pagamento->reserva()
+                ->whereNull('deleted_at')
+                ->exists();
+
+            if ($reservaAtiva) {
+                return response()->json([
+                    'message' => 'Este pagamento está vinculado a uma reserva ativa. Cancele-o ao invés de excluir.',
+                ], 422);
+            }
+        }
+
         $pagamento->delete();
 
         return response()->json(['message' => 'Pagamento excluído']);
@@ -139,5 +159,39 @@ class PagamentoController extends Controller
         $pagamento->restore();
 
         return response()->json(['message' => 'Pagamento restaurado']);
+    }
+
+    private function aplicarFiltros($query, Request $request): void
+    {
+        if ($request->filled('cliente_id')) {
+            $query->where('cliente_id', $request->integer('cliente_id'));
+        }
+
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+
+        if ($request->filled('tipo')) {
+            $query->where('tipo', $request->tipo);
+        }
+
+        if ($request->filled('referencia_mes')) {
+            $query->where('referencia_mes', $request->referencia_mes);
+        }
+
+        if ($request->filled('data_inicio') && $request->filled('data_fim')) {
+            $query->whereBetween('created_at', [
+                $request->date('data_inicio')->startOfDay(),
+                $request->date('data_fim')->endOfDay(),
+            ]);
+        }
+
+        if ($request->filled('busca')) {
+            $termo = '%' . str_replace(['%', '_'], ['\\%', '\\_'], $request->busca) . '%';
+            $query->where(function ($q) use ($termo) {
+                $q->where('obs', 'like', $termo)
+                    ->orWhereHas('cliente', fn($c) => $c->where('nome', 'like', $termo));
+            });
+        }
     }
 }

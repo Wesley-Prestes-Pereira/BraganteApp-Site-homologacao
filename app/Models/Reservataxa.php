@@ -4,12 +4,13 @@ namespace App\Models;
 
 use OwenIt\Auditing\Auditable;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use OwenIt\Auditing\Contracts\Auditable as AuditableContract;
 
 class ReservaTaxa extends Model implements AuditableContract
 {
-    use Auditable;
+    use SoftDeletes, Auditable;
 
     protected $table = 'reserva_taxas';
 
@@ -40,5 +41,6 @@ class ReservaTaxa extends Model implements AuditableContract
     {
         static::saved(fn() => Reserva::limparCache());
         static::deleted(fn() => Reserva::limparCache());
+        static::restored(fn() => Reserva::limparCache());
     }
 }
