@@ -64,11 +64,11 @@ class AreaController extends Controller
 
         $diasAbrev = [
             'SEGUNDA' => 'SEG',
-            'TERCA' => 'TER',
-            'QUARTA' => 'QUA',
-            'QUINTA' => 'QUI',
-            'SEXTA' => 'SEX',
-            'SABADO' => 'SÁB',
+            'TERCA'   => 'TER',
+            'QUARTA'  => 'QUA',
+            'QUINTA'  => 'QUI',
+            'SEXTA'   => 'SEX',
+            'SABADO'  => 'SÁB',
             'DOMINGO' => 'DOM',
         ];
         $todosDias = ['SEGUNDA', 'TERCA', 'QUARTA', 'QUINTA', 'SEXTA', 'SABADO', 'DOMINGO'];
@@ -79,6 +79,7 @@ class AreaController extends Controller
 
         $areasProcessadas = $areas->map(function ($area) use ($todosDias, $areasComReservas) {
             $area->dias_lista = $area->diasCached();
+            $area->config_dias = $area->configDiasCached();
             $area->pode_excluir = !$areasComReservas->contains($area->id);
             return $area;
         });
@@ -95,15 +96,17 @@ class AreaController extends Controller
     public function store(Request $request): JsonResponse
     {
         $validated = $request->validate([
-            'nome'               => 'required|string|max:191|unique:areas,nome',
-            'tipo_area_id'       => 'required|integer|exists:tipos_area,id',
-            'descricao'          => 'nullable|string|max:500',
-            'capacidade_pessoas' => 'nullable|integer|min:1|max:9999',
-            'modo_reserva'       => 'required|in:HORARIO,DIA_INTEIRO',
-            'dias'               => 'required|array|min:1',
-            'dias.*'             => 'in:DOMINGO,SEGUNDA,TERCA,QUARTA,QUINTA,SEXTA,SABADO',
-            'horarios'           => 'nullable|array',
-            'horarios.*'         => 'date_format:H:i',
+            'nome'                            => 'required|string|max:191|unique:areas,nome',
+            'tipo_area_id'                    => 'required|integer|exists:tipos_area,id',
+            'descricao'                       => 'nullable|string|max:500',
+            'capacidade_pessoas'              => 'nullable|integer|min:1|max:9999',
+            'modo_reserva'                    => 'required|in:HORARIO,DIA_INTEIRO',
+            'duracao_slot_min'                => 'nullable|integer|in:15,30,45,60,90,120',
+            'dias'                            => 'required|array|min:1',
+            'dias.*'                          => 'in:DOMINGO,SEGUNDA,TERCA,QUARTA,QUINTA,SEXTA,SABADO',
+            'config_dias'                     => 'nullable|array',
+            'config_dias.*.abertura'          => 'required_with:config_dias|date_format:H:i',
+            'config_dias.*.fechamento'        => 'required_with:config_dias|date_format:H:i|after:config_dias.*.abertura',
         ]);
 
         $area = DB::transaction(function () use ($validated) {
@@ -113,13 +116,10 @@ class AreaController extends Controller
                 'descricao'          => $validated['descricao'] ?? null,
                 'capacidade_pessoas' => $validated['capacidade_pessoas'] ?? null,
                 'modo_reserva'       => $validated['modo_reserva'],
+                'duracao_slot_min'   => $validated['duracao_slot_min'] ?? 60,
             ]);
 
-            $this->syncDiasInterno($area, $validated['dias']);
-
-            if ($validated['modo_reserva'] === 'HORARIO' && !empty($validated['horarios'])) {
-                $this->syncHorariosInterno($area, $validated['dias'], $validated['horarios']);
-            }
+            $this->syncDiasInterno($area, $validated['dias'], $validated['config_dias'] ?? []);
 
             return $area;
         });
@@ -132,28 +132,26 @@ class AreaController extends Controller
         $area = Area::findOrFail($id);
 
         $validated = $request->validate([
-            'nome'               => "sometimes|string|max:191|unique:areas,nome,{$area->id}",
-            'tipo_area_id'       => 'sometimes|integer|exists:tipos_area,id',
-            'descricao'          => 'nullable|string|max:500',
-            'capacidade_pessoas' => 'nullable|integer|min:1|max:9999',
-            'modo_reserva'       => 'sometimes|in:HORARIO,DIA_INTEIRO',
-            'dias'               => 'sometimes|array|min:1',
-            'dias.*'             => 'in:DOMINGO,SEGUNDA,TERCA,QUARTA,QUINTA,SEXTA,SABADO',
-            'horarios'           => 'nullable|array',
-            'horarios.*'         => 'date_format:H:i',
+            'nome'                            => "sometimes|string|max:191|unique:areas,nome,{$area->id}",
+            'tipo_area_id'                    => 'sometimes|integer|exists:tipos_area,id',
+            'descricao'                       => 'nullable|string|max:500',
+            'capacidade_pessoas'              => 'nullable|integer|min:1|max:9999',
+            'modo_reserva'                    => 'sometimes|in:HORARIO,DIA_INTEIRO',
+            'duracao_slot_min'                => 'nullable|integer|in:15,30,45,60,90,120',
+            'dias'                            => 'sometimes|array|min:1',
+            'dias.*'                          => 'in:DOMINGO,SEGUNDA,TERCA,QUARTA,QUINTA,SEXTA,SABADO',
+            'config_dias'                     => 'nullable|array',
+            'config_dias.*.abertura'          => 'required_with:config_dias|date_format:H:i',
+            'config_dias.*.fechamento'        => 'required_with:config_dias|date_format:H:i|after:config_dias.*.abertura',
         ]);
 
         DB::transaction(function () use ($area, $validated) {
-            $area->update(collect($validated)->except(['dias', 'horarios'])->toArray());
+            $area->update(collect($validated)->except(['dias', 'config_dias'])->toArray());
 
             if (isset($validated['dias'])) {
-                $this->syncDiasInterno($area, $validated['dias']);
+                $this->syncDiasInterno($area, $validated['dias'], $validated['config_dias'] ?? []);
 
-                $modo = $area->modo_reserva;
-                if ($modo === 'HORARIO' && !empty($validated['horarios'])) {
-                    $area->horariosConfig()->withTrashed()->forceDelete();
-                    $this->syncHorariosInterno($area, $validated['dias'], $validated['horarios']);
-                } elseif ($modo === 'DIA_INTEIRO') {
+                if ($area->modo_reserva === 'DIA_INTEIRO') {
                     $area->horariosConfig()->withTrashed()->forceDelete();
                 }
             }
@@ -211,11 +209,20 @@ class AreaController extends Controller
     {
         $area = Area::findOrFail($id);
 
+        $bloqueados = [];
+        $registros = $area->horariosConfig()->where('ativo', false)->get();
+        foreach ($registros as $reg) {
+            $bloqueados[$reg->dia_semana][] = $reg->horarioFormatado();
+        }
+
         return response()->json([
-            'area_id'       => $area->id,
-            'modo_reserva'  => $area->modo_reserva,
-            'dias'          => $area->diasCached(),
-            'horarios'      => $area->todosHorariosCached(),
+            'area_id'          => $area->id,
+            'modo_reserva'     => $area->modo_reserva,
+            'duracao_slot_min' => $area->duracao_slot_min,
+            'dias'             => $area->diasCached(),
+            'config_dias'      => $area->configDiasCached(),
+            'horarios'         => $area->todosHorariosCached(),
+            'bloqueados'       => $bloqueados,
         ]);
     }
 
@@ -228,21 +235,20 @@ class AreaController extends Controller
         }
 
         $validated = $request->validate([
-            'horarios'              => 'required|array',
-            'horarios.*.dia_semana' => 'required|in:DOMINGO,SEGUNDA,TERCA,QUARTA,QUINTA,SEXTA,SABADO',
-            'horarios.*.horario'    => 'required|date_format:H:i',
-            'horarios.*.ativo'      => 'boolean',
+            'bloqueados'              => 'present|array',
+            'bloqueados.*.dia_semana' => 'required|in:DOMINGO,SEGUNDA,TERCA,QUARTA,QUINTA,SEXTA,SABADO',
+            'bloqueados.*.horario'    => 'required|date_format:H:i',
         ]);
 
         DB::transaction(function () use ($area, $validated) {
             $area->horariosConfig()->withTrashed()->forceDelete();
 
-            foreach ($validated['horarios'] as $h) {
+            foreach ($validated['bloqueados'] as $b) {
                 AreaHorario::create([
                     'area_id'    => $area->id,
-                    'dia_semana' => $h['dia_semana'],
-                    'horario'    => $h['horario'],
-                    'ativo'      => $h['ativo'] ?? true,
+                    'dia_semana' => $b['dia_semana'],
+                    'horario'    => $b['horario'],
+                    'ativo'      => false,
                 ]);
             }
         });
@@ -257,39 +263,32 @@ class AreaController extends Controller
         $area = Area::findOrFail($id);
 
         $validated = $request->validate([
-            'dias'   => 'required|array|min:1',
-            'dias.*' => 'in:DOMINGO,SEGUNDA,TERCA,QUARTA,QUINTA,SEXTA,SABADO',
+            'dias'                            => 'required|array|min:1',
+            'dias.*'                          => 'in:DOMINGO,SEGUNDA,TERCA,QUARTA,QUINTA,SEXTA,SABADO',
+            'config_dias'                     => 'nullable|array',
+            'config_dias.*.abertura'          => 'required_with:config_dias|date_format:H:i',
+            'config_dias.*.fechamento'        => 'required_with:config_dias|date_format:H:i|after:config_dias.*.abertura',
         ]);
 
-        $this->syncDiasInterno($area, $validated['dias']);
+        $this->syncDiasInterno($area, $validated['dias'], $validated['config_dias'] ?? []);
         Area::limparCache();
 
         return response()->json(['message' => 'Dias atualizados']);
     }
 
-    private function syncDiasInterno(Area $area, array $dias): void
+    private function syncDiasInterno(Area $area, array $dias, array $configDias = []): void
     {
         $area->diasDisponiveis()->delete();
 
         foreach ($dias as $dia) {
-            AreaDiaDisponivel::create([
-                'area_id'    => $area->id,
-                'dia_semana' => $dia,
-            ]);
-        }
-    }
+            $config = $configDias[$dia] ?? [];
 
-    private function syncHorariosInterno(Area $area, array $dias, array $horarios): void
-    {
-        foreach ($dias as $dia) {
-            foreach ($horarios as $horario) {
-                AreaHorario::create([
-                    'area_id'    => $area->id,
-                    'dia_semana' => $dia,
-                    'horario'    => $horario,
-                    'ativo'      => true,
-                ]);
-            }
+            AreaDiaDisponivel::create([
+                'area_id'             => $area->id,
+                'dia_semana'          => $dia,
+                'horario_abertura'    => $config['abertura'] ?? null,
+                'horario_fechamento'  => $config['fechamento'] ?? null,
+            ]);
         }
     }
 }

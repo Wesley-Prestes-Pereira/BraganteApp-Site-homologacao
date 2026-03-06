@@ -323,19 +323,17 @@
         .empty-state {
             text-align: center;
             padding: 60px 20px;
-            color: var(--t3);
         }
 
         .empty-state i {
             font-size: 2.5rem;
-            margin-bottom: 12px;
-            display: block;
-            opacity: .4;
+            margin-bottom: 14px;
         }
 
         .empty-state__text {
-            font-size: .92rem;
-            margin-bottom: 16px;
+            font-size: .94rem;
+            color: var(--t3);
+            margin-bottom: 18px;
         }
 
         .modal-overlay {
@@ -343,13 +341,15 @@
             inset: 0;
             background: rgba(0, 0, 0, .55);
             display: flex;
-            align-items: center;
+            align-items: flex-start;
             justify-content: center;
             z-index: 200;
             opacity: 0;
             visibility: hidden;
             transition: all .2s;
-            padding: 16px;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+            padding: 24px 16px;
         }
 
         .modal-overlay.is-open {
@@ -359,33 +359,34 @@
 
         .modal-box {
             background: var(--card);
-            border: 1px solid var(--card-border);
             border-radius: 16px;
             width: 100%;
             max-width: 520px;
-            max-height: 90vh;
-            overflow-y: auto;
-            transform: scale(.96);
-            transition: transform .2s;
-        }
-
-        .modal-overlay.is-open .modal-box {
-            transform: scale(1);
+            margin: auto;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, .3);
+            display: flex;
+            flex-direction: column;
+            max-height: calc(100vh - 48px);
         }
 
         .modal-head {
             padding: 18px 22px;
             border-bottom: 1px solid var(--card-border);
-            font-size: 1.05rem;
+            font-size: 1rem;
             font-weight: 700;
             color: var(--t1);
+            flex-shrink: 0;
         }
 
         .modal-body {
-            padding: 22px;
+            padding: 20px 22px;
             display: flex;
             flex-direction: column;
             gap: 16px;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+            flex: 1;
+            min-height: 0;
         }
 
         .modal-foot {
@@ -394,32 +395,49 @@
             display: flex;
             justify-content: flex-end;
             gap: 10px;
+            flex-shrink: 0;
         }
 
         .sdb-label {
             display: block;
             font-size: .78rem;
             font-weight: 600;
-            color: var(--t2);
+            color: var(--t3);
             margin-bottom: 6px;
         }
 
         .sdb-input,
-        .sdb-select,
-        .sdb-textarea {
+        .sdb-select {
             width: 100%;
-            padding: 10px 14px;
-            background: var(--input-bg);
+            height: 38px;
+            padding: 0 12px;
+            background: var(--bg);
             border: 1px solid var(--card-border);
             border-radius: 10px;
             color: var(--t1);
             font-family: inherit;
-            font-size: .88rem;
+            font-size: .86rem;
             transition: border-color .15s;
         }
 
         .sdb-input:focus,
-        .sdb-select:focus,
+        .sdb-select:focus {
+            outline: none;
+            border-color: var(--accent);
+        }
+
+        .sdb-textarea {
+            width: 100%;
+            padding: 10px 12px;
+            background: var(--bg);
+            border: 1px solid var(--card-border);
+            border-radius: 10px;
+            color: var(--t1);
+            font-family: inherit;
+            font-size: .86rem;
+            transition: border-color .15s;
+        }
+
         .sdb-textarea:focus {
             outline: none;
             border-color: var(--accent);
@@ -500,56 +518,69 @@
         }
 
         .horarios-section.is-visible {
-            display: block;
-        }
-
-        .horarios-row {
             display: flex;
-            gap: 8px;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .slots-preview {
+            display: flex;
             align-items: center;
-            margin-bottom: 8px;
+            height: 38px;
+            padding: 0 12px;
+            background: var(--bg);
+            border: 1px solid var(--card-border);
+            border-radius: 10px;
+            font-size: .82rem;
+            color: var(--t2);
+            font-weight: 600;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
-        .horarios-row .sdb-input {
-            flex: 1;
-        }
-
-        .btn-add-horario {
+        .check-inline {
             display: inline-flex;
             align-items: center;
-            gap: 6px;
-            padding: 6px 12px;
-            background: transparent;
-            border: 1px dashed var(--card-border);
-            border-radius: 8px;
-            color: var(--accent);
-            font-family: inherit;
-            font-size: .8rem;
+            gap: 8px;
+            font-size: .82rem;
+            color: var(--t2);
             cursor: pointer;
-            transition: all .15s;
         }
 
-        .btn-add-horario:hover {
-            border-color: var(--accent);
-            background: rgba(91, 156, 246, .05);
+        .check-inline input[type="checkbox"] {
+            width: 16px;
+            height: 16px;
+            accent-color: var(--accent);
+            cursor: pointer;
         }
 
-        .btn-rm-horario {
-            width: 30px;
-            height: 30px;
+        .dias-config {
             display: flex;
-            align-items: center;
-            justify-content: center;
-            border: none;
-            background: transparent;
-            color: var(--danger);
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: .78rem;
+            flex-direction: column;
+            gap: 8px;
+            margin-top: 8px;
         }
 
-        .btn-rm-horario:hover {
-            background: rgba(248, 113, 113, .08);
+        .dia-config-row {
+            display: grid;
+            grid-template-columns: 50px 1fr auto 1fr;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .dia-config-label {
+            font-size: .78rem;
+            font-weight: 700;
+            color: var(--accent);
+            text-align: center;
+        }
+
+        .dia-config-sep {
+            font-size: .75rem;
+            color: var(--t4);
+            text-align: center;
+            min-width: 20px;
         }
 
         .btn-primary {
@@ -629,7 +660,6 @@
             opacity: 0;
             visibility: hidden;
             transition: all .2s;
-            padding: 16px;
         }
 
         .confirm-overlay.is-open {
@@ -639,28 +669,23 @@
 
         .confirm-box {
             background: var(--card);
-            border: 1px solid var(--card-border);
             border-radius: 16px;
             padding: 28px;
+            max-width: 400px;
             width: 100%;
-            max-width: 420px;
             text-align: center;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, .3);
         }
 
         .confirm-box__ic {
-            width: 56px;
-            height: 56px;
-            border-radius: 14px;
+            width: 52px;
+            height: 52px;
+            border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 1.4rem;
-            margin: 0 auto 16px;
-        }
-
-        .confirm-box__ic--danger {
-            background: rgba(248, 113, 113, .12);
-            color: var(--danger);
+            margin: 0 auto 14px;
+            font-size: 1.2rem;
         }
 
         .confirm-box__ic--warning {
@@ -668,13 +693,13 @@
             color: var(--warning);
         }
 
-        .confirm-box__ic--info {
-            background: rgba(91, 156, 246, .12);
-            color: var(--accent);
+        .confirm-box__ic--danger {
+            background: rgba(248, 113, 113, .12);
+            color: var(--danger);
         }
 
         .confirm-box__title {
-            font-size: 1.05rem;
+            font-size: 1.04rem;
             font-weight: 700;
             color: var(--t1);
             margin-bottom: 8px;
@@ -683,14 +708,34 @@
         .confirm-box__msg {
             font-size: .86rem;
             color: var(--t3);
-            margin-bottom: 24px;
             line-height: 1.5;
+            margin-bottom: 22px;
         }
 
         .confirm-box__actions {
             display: flex;
-            justify-content: center;
             gap: 10px;
+            justify-content: center;
+        }
+
+        .btn-warning {
+            height: 38px;
+            padding: 0 18px;
+            background: var(--warning);
+            color: #fff;
+            border: none;
+            border-radius: 10px;
+            font-family: inherit;
+            font-size: .84rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn-warning:hover {
+            opacity: .85;
         }
 
         .btn-danger {
@@ -707,31 +752,9 @@
             display: inline-flex;
             align-items: center;
             gap: 6px;
-            transition: opacity .15s;
         }
 
         .btn-danger:hover {
-            opacity: .85;
-        }
-
-        .btn-warning {
-            height: 38px;
-            padding: 0 18px;
-            background: var(--warning);
-            color: #000;
-            border: none;
-            border-radius: 10px;
-            font-family: inherit;
-            font-size: .84rem;
-            font-weight: 600;
-            cursor: pointer;
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            transition: opacity .15s;
-        }
-
-        .btn-warning:hover {
             opacity: .85;
         }
 
@@ -757,8 +780,12 @@
                 font-size: .98rem;
             }
 
+            .modal-overlay {
+                padding: 12px;
+            }
+
             .modal-box {
-                max-width: 100%;
+                max-height: calc(100vh - 24px);
             }
 
             .field-row {
@@ -776,6 +803,15 @@
 
             .dia-check__abbr {
                 font-size: .6rem;
+            }
+
+            .dia-config-row {
+                grid-template-columns: 40px 1fr auto 1fr;
+                gap: 4px;
+            }
+
+            .dia-config-label {
+                font-size: .7rem;
             }
         }
 
@@ -811,6 +847,19 @@
                 height: 20px;
                 font-size: .52rem;
             }
+
+            .dia-config-row {
+                grid-template-columns: 36px 1fr auto 1fr;
+            }
+
+            .dia-config-label {
+                font-size: .65rem;
+            }
+
+            .dia-config-sep {
+                min-width: 16px;
+                font-size: .7rem;
+            }
         }
 
         @media (max-width: 320px) {
@@ -824,6 +873,21 @@
 
             .ar-card__row {
                 font-size: .78rem;
+            }
+
+            .dia-config-row {
+                grid-template-columns: 1fr 1fr;
+                gap: 6px;
+            }
+
+            .dia-config-label {
+                grid-column: 1 / -1;
+                text-align: left;
+                font-size: .72rem;
+            }
+
+            .dia-config-sep {
+                display: none;
             }
         }
     </style>
@@ -867,7 +931,9 @@
                                             'descricao' => $area->descricao,
                                             'capacidade_pessoas' => $area->capacidade_pessoas,
                                             'modo_reserva' => $area->modo_reserva,
+                                            'duracao_slot_min' => $area->duracao_slot_min,
                                             'dias_lista' => $area->dias_lista,
+                                            'config_dias' => $area->config_dias,
                                         ]) }})">
                                         <i class="fi fi-rr-pencil"></i> Editar
                                     </button>
@@ -912,7 +978,23 @@
                         </div>
                         <div class="ar-card__row">
                             <i class="fi fi-rr-clock"></i>
-                            {{ $area->modo_reserva === 'DIA_INTEIRO' ? 'Dia inteiro' : 'Por horário' }}
+                            @if ($area->modo_reserva === 'DIA_INTEIRO')
+                                Dia inteiro
+                            @else
+                                @php
+                                    $configs = $area->config_dias;
+                                    $aberturas = collect($configs)->pluck('horario_abertura')->filter()->unique();
+                                    $fechamentos = collect($configs)->pluck('horario_fechamento')->filter()->unique();
+                                @endphp
+                                @if ($aberturas->count() === 1 && $fechamentos->count() === 1)
+                                    {{ $aberturas->first() }} — {{ $fechamentos->first() }} ·
+                                    {{ $area->duracao_slot_min }}min
+                                @elseif ($aberturas->isNotEmpty())
+                                    Varia por dia · {{ $area->duracao_slot_min }}min
+                                @else
+                                    {{ $area->duracao_slot_min }}min/slot
+                                @endif
+                            @endif
                             @if ($area->capacidade_pessoas)
                                 &middot; {{ $area->capacidade_pessoas }} pessoas
                             @endif
@@ -973,11 +1055,42 @@
                         <div class="dias-grid" id="diasGrid"></div>
                     </div>
                     <div class="horarios-section" id="horariosSection">
-                        <label class="sdb-label">Horários</label>
-                        <div id="horariosContainer"></div>
-                        <button type="button" class="btn-add-horario" onclick="addHorario()">
-                            <i class="fi fi-rr-plus"></i> Adicionar Horário
-                        </button>
+                        <div class="field-row">
+                            <div>
+                                <label class="sdb-label">Duração do slot</label>
+                                <select id="area-duracao" class="sdb-select" onchange="atualizarPreview()">
+                                    <option value="15">15 min</option>
+                                    <option value="30">30 min</option>
+                                    <option value="45">45 min</option>
+                                    <option value="60" selected>1 hora</option>
+                                    <option value="90">1h30</option>
+                                    <option value="120">2 horas</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="sdb-label">Preview</label>
+                                <div class="slots-preview" id="slotsPreview">—</div>
+                            </div>
+                        </div>
+                        <div class="field-row">
+                            <div>
+                                <label class="sdb-label">Abre às</label>
+                                <input type="time" id="area-abertura" class="sdb-input" value="07:00"
+                                    onchange="atualizarPreview()">
+                            </div>
+                            <div>
+                                <label class="sdb-label">Fecha às</label>
+                                <input type="time" id="area-fechamento" class="sdb-input" value="23:00"
+                                    onchange="atualizarPreview()">
+                            </div>
+                        </div>
+                        <div>
+                            <label class="check-inline">
+                                <input type="checkbox" id="area-personalizar" onchange="togglePersonalizar()">
+                                <span>Personalizar horários por dia</span>
+                            </label>
+                        </div>
+                        <div id="diasConfigContainer" style="display:none"></div>
                     </div>
                 </div>
                 <div class="modal-foot">
@@ -1044,10 +1157,21 @@
             }
         ];
 
+        var DIAS_ABBR = {
+            'SEGUNDA': 'SEG',
+            'TERCA': 'TER',
+            'QUARTA': 'QUA',
+            'QUINTA': 'QUI',
+            'SEXTA': 'SEX',
+            'SABADO': 'SÁB',
+            'DOMINGO': 'DOM'
+        };
+
         var modalState = {
             editing: false,
             id: null,
-            diasSel: []
+            diasSel: [],
+            configDias: {}
         };
         var confirmCallback = null;
 
@@ -1098,6 +1222,12 @@
             } else {
                 modalState.diasSel.push(dia);
             }
+            var chk = document.getElementById('area-personalizar');
+            if (chk && chk.checked) {
+                salvarConfigDiasDoDOM();
+                renderDiasConfig();
+            }
+            atualizarPreview();
         }
 
         function toggleHorarios() {
@@ -1105,25 +1235,158 @@
             var sec = document.getElementById('horariosSection');
             if (modo === 'HORARIO') {
                 sec.classList.add('is-visible');
+                atualizarPreview();
             } else {
                 sec.classList.remove('is-visible');
             }
         }
 
-        function addHorario(valor) {
-            var container = document.getElementById('horariosContainer');
-            var row = document.createElement('div');
-            row.className = 'horarios-row';
-            row.innerHTML = '<input type="time" class="sdb-input horario-input" value="' + (valor || '') + '">' +
-                '<button type="button" class="btn-rm-horario" onclick="this.parentElement.remove()">' +
-                '<i class="fi fi-rr-cross-small"></i></button>';
-            container.appendChild(row);
+        function togglePersonalizar() {
+            var checked = document.getElementById('area-personalizar').checked;
+            var container = document.getElementById('diasConfigContainer');
+            if (checked) {
+                container.style.display = 'block';
+                renderDiasConfig();
+            } else {
+                salvarConfigDiasDoDOM();
+                container.style.display = 'none';
+            }
+            atualizarPreview();
+        }
+
+        function salvarConfigDiasDoDOM() {
+            document.querySelectorAll('.dia-abertura').forEach(function(inp) {
+                var dia = inp.dataset.dia;
+                var feInp = document.querySelector('.dia-fechamento[data-dia="' + dia + '"]');
+                if (feInp) {
+                    if (!modalState.configDias) modalState.configDias = {};
+                    modalState.configDias[dia] = {
+                        horario_abertura: inp.value,
+                        horario_fechamento: feInp.value
+                    };
+                }
+            });
+        }
+
+        function renderDiasConfig() {
+            var container = document.getElementById('diasConfigContainer');
+            var abertura = document.getElementById('area-abertura').value || '07:00';
+            var fechamento = document.getElementById('area-fechamento').value || '23:00';
+            var h = '<div class="dias-config">';
+
+            var diasOrdem = ['SEGUNDA', 'TERCA', 'QUARTA', 'QUINTA', 'SEXTA', 'SABADO', 'DOMINGO'];
+            for (var i = 0; i < diasOrdem.length; i++) {
+                var dia = diasOrdem[i];
+                if (modalState.diasSel.indexOf(dia) === -1) continue;
+
+                var cfg = (modalState.configDias && modalState.configDias[dia]) || {};
+                var ab = cfg.horario_abertura || cfg.abertura || abertura;
+                var fe = cfg.horario_fechamento || cfg.fechamento || fechamento;
+
+                h += '<div class="dia-config-row">';
+                h += '<span class="dia-config-label">' + DIAS_ABBR[dia] + '</span>';
+                h += '<input type="time" class="sdb-input dia-abertura" data-dia="' + dia + '" value="' + ab +
+                    '" onchange="atualizarPreview()">';
+                h += '<span class="dia-config-sep">às</span>';
+                h += '<input type="time" class="sdb-input dia-fechamento" data-dia="' + dia + '" value="' + fe +
+                    '" onchange="atualizarPreview()">';
+                h += '</div>';
+            }
+            h += '</div>';
+            container.innerHTML = h;
+        }
+
+        function calcularSlots(abertura, fechamento, duracao) {
+            if (!abertura || !fechamento || !duracao) return 0;
+            var pa = abertura.split(':');
+            var pf = fechamento.split(':');
+            var minA = parseInt(pa[0]) * 60 + parseInt(pa[1]);
+            var minF = parseInt(pf[0]) * 60 + parseInt(pf[1]);
+            if (minF <= minA) return 0;
+            return Math.floor((minF - minA) / duracao) + 1;
+        }
+
+        function atualizarPreview() {
+            var el = document.getElementById('slotsPreview');
+            if (!el) return;
+            var duracao = parseInt(document.getElementById('area-duracao').value) || 60;
+            var personalizar = document.getElementById('area-personalizar').checked;
+
+            if (!personalizar) {
+                var ab = document.getElementById('area-abertura').value;
+                var fe = document.getElementById('area-fechamento').value;
+                var total = calcularSlots(ab, fe, duracao);
+                el.textContent = total > 0 ? total + ' slots (' + ab + ' — ' + fe + ')' : '—';
+                return;
+            }
+
+            var inputs = document.querySelectorAll('.dia-abertura');
+            if (!inputs.length) {
+                el.textContent = '—';
+                return;
+            }
+
+            var min = Infinity;
+            var max = 0;
+            var todosIguais = true;
+            var primeiro = null;
+
+            inputs.forEach(function(inp) {
+                var dia = inp.dataset.dia;
+                var feInp = document.querySelector('.dia-fechamento[data-dia="' + dia + '"]');
+                if (!feInp) return;
+                var s = calcularSlots(inp.value, feInp.value, duracao);
+                if (primeiro === null) primeiro = s;
+                if (s !== primeiro) todosIguais = false;
+                if (s < min) min = s;
+                if (s > max) max = s;
+            });
+
+            if (todosIguais && primeiro !== null) {
+                el.textContent = primeiro + ' slots/dia';
+            } else if (min !== Infinity) {
+                el.textContent = min + '–' + max + ' slots/dia';
+            } else {
+                el.textContent = '—';
+            }
+        }
+
+        function getConfigDias() {
+            var personalizar = document.getElementById('area-personalizar').checked;
+            var config = {};
+
+            if (!personalizar) {
+                var ab = document.getElementById('area-abertura').value;
+                var fe = document.getElementById('area-fechamento').value;
+                for (var i = 0; i < modalState.diasSel.length; i++) {
+                    config[modalState.diasSel[i]] = {
+                        abertura: ab,
+                        fechamento: fe
+                    };
+                }
+                return config;
+            }
+
+            salvarConfigDiasDoDOM();
+            document.querySelectorAll('.dia-abertura').forEach(function(inp) {
+                var dia = inp.dataset.dia;
+                var feInp = document.querySelector('.dia-fechamento[data-dia="' + dia + '"]');
+                if (feInp && inp.value && feInp.value) {
+                    config[dia] = {
+                        abertura: inp.value,
+                        fechamento: feInp.value
+                    };
+                }
+            });
+
+            return config;
         }
 
         function abrirModal(data) {
             modalState.editing = !!data;
             modalState.id = data ? data.id : null;
             modalState.diasSel = data ? (data.dias_lista || []).slice() : [];
+            modalState.configDias = data ? (data.config_dias || {}) : {};
 
             document.getElementById('modalTitulo').textContent = data ? 'Editar Área' : 'Nova Área';
             document.getElementById('area-id').value = data ? data.id : '';
@@ -1131,40 +1394,51 @@
             document.getElementById('area-modo').value = data ? data.modo_reserva : 'HORARIO';
             document.getElementById('area-descricao').value = data ? (data.descricao || '') : '';
             document.getElementById('area-capacidade').value = data ? (data.capacidade_pessoas || '') : '';
+            document.getElementById('area-duracao').value = data ? (data.duracao_slot_min || 60) : 60;
 
             document.querySelectorAll('.dia-check').forEach(function(el) {
                 el.classList.toggle('active', modalState.diasSel.indexOf(el.dataset.dia) > -1);
             });
 
-            document.getElementById('horariosContainer').innerHTML = '';
-            toggleHorarios();
+            var personalizar = document.getElementById('area-personalizar');
+            personalizar.checked = false;
+            document.getElementById('diasConfigContainer').style.display = 'none';
+            document.getElementById('diasConfigContainer').innerHTML = '';
 
+            if (data && data.config_dias && data.modo_reserva === 'HORARIO') {
+                var aberturas = {};
+                var fechamentos = {};
+                var dias = Object.keys(data.config_dias);
+                for (var i = 0; i < dias.length; i++) {
+                    var cfg = data.config_dias[dias[i]];
+                    if (cfg.horario_abertura) aberturas[cfg.horario_abertura] = true;
+                    if (cfg.horario_fechamento) fechamentos[cfg.horario_fechamento] = true;
+                }
+                var abKeys = Object.keys(aberturas);
+                var feKeys = Object.keys(fechamentos);
+
+                if (abKeys.length === 1 && feKeys.length === 1) {
+                    document.getElementById('area-abertura').value = abKeys[0];
+                    document.getElementById('area-fechamento').value = feKeys[0];
+                } else if (abKeys.length > 0) {
+                    document.getElementById('area-abertura').value = abKeys[0];
+                    document.getElementById('area-fechamento').value = feKeys[0] || '23:00';
+                    personalizar.checked = true;
+                    document.getElementById('diasConfigContainer').style.display = 'block';
+                }
+            } else {
+                document.getElementById('area-abertura').value = '07:00';
+                document.getElementById('area-fechamento').value = '23:00';
+            }
+
+            toggleHorarios();
             document.getElementById('modalArea').classList.add('is-open');
 
-            if (data && data.modo_reserva === 'HORARIO') {
-                fetch(ROUTES.horarios.replace(':id', data.id), {
-                        headers: {
-                            'Accept': 'application/json'
-                        }
-                    })
-                    .then(function(r) {
-                        return r.json();
-                    })
-                    .then(function(info) {
-                        var horariosUnicos = {};
-                        var dias = Object.keys(info.horarios || {});
-                        for (var i = 0; i < dias.length; i++) {
-                            var lista = info.horarios[dias[i]];
-                            for (var j = 0; j < lista.length; j++) {
-                                horariosUnicos[lista[j]] = true;
-                            }
-                        }
-                        var ordenados = Object.keys(horariosUnicos).sort();
-                        for (var k = 0; k < ordenados.length; k++) {
-                            addHorario(ordenados[k]);
-                        }
-                    })
-                    .catch(function() {});
+            if (data && data.modo_reserva === 'HORARIO' && data.config_dias) {
+                if (personalizar.checked) {
+                    renderDiasConfig();
+                }
+                atualizarPreview();
             }
         }
 
@@ -1189,15 +1463,41 @@
                 return;
             }
 
-            var horarios = [];
-            document.querySelectorAll('.horario-input').forEach(function(el) {
-                if (el.value) horarios.push(el.value);
-            });
-
             var modo = document.getElementById('area-modo').value;
-            if (modo === 'HORARIO' && horarios.length === 0 && !modalState.editing) {
-                SdbToast.error('Adicione ao menos um horário.');
-                return;
+
+            if (modo === 'HORARIO') {
+                var ab = document.getElementById('area-abertura').value;
+                var fe = document.getElementById('area-fechamento').value;
+                var personalizar = document.getElementById('area-personalizar').checked;
+
+                if (!personalizar && (!ab || !fe)) {
+                    SdbToast.error('Informe o horário de abertura e fechamento.');
+                    return;
+                }
+
+                if (!personalizar && ab >= fe) {
+                    SdbToast.error('O horário de fechamento deve ser após o de abertura.');
+                    return;
+                }
+
+                var configDias = getConfigDias();
+                var temConfig = Object.keys(configDias).length > 0;
+                if (!temConfig) {
+                    SdbToast.error('Configure os horários de abertura e fechamento.');
+                    return;
+                }
+
+                if (personalizar) {
+                    var diasKeys = Object.keys(configDias);
+                    for (var ci = 0; ci < diasKeys.length; ci++) {
+                        var cd = configDias[diasKeys[ci]];
+                        if (cd.abertura >= cd.fechamento) {
+                            SdbToast.error('Horário inválido para ' + DIAS_ABBR[diasKeys[ci]] +
+                                ': fechamento deve ser após abertura.');
+                            return;
+                        }
+                    }
+                }
             }
 
             var btn = document.getElementById('btnSalvar');
@@ -1212,7 +1512,10 @@
                 dias: modalState.diasSel
             };
 
-            if (horarios.length > 0) payload.horarios = horarios;
+            if (modo === 'HORARIO') {
+                payload.duracao_slot_min = parseInt(document.getElementById('area-duracao').value) || 60;
+                payload.config_dias = getConfigDias();
+            }
 
             var url = modalState.editing ? ROUTES.update.replace(':id', modalState.id) : ROUTES.store;
             var method = modalState.editing ? 'PUT' : 'POST';
@@ -1242,7 +1545,10 @@
                 .catch(function(err) {
                     btn.disabled = false;
                     var msg = err.message || 'Erro ao salvar área.';
-                    if (err.errors) msg = Object.values(err.errors).flat().join('\n');
+                    if (err.errors) {
+                        var keys = Object.keys(err.errors);
+                        msg = err.errors[keys[0]][0];
+                    }
                     SdbToast.error(msg);
                 });
         }

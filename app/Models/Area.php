@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Carbon\Carbon;
 use OwenIt\Auditing\Auditable;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Database\Eloquent\Casts\Attribute;
@@ -21,6 +22,7 @@ class Area extends Model implements AuditableContract
         'descricao',
         'capacidade_pessoas',
         'modo_reserva',
+        'duracao_slot_min',
         'ativo',
     ];
 
@@ -29,6 +31,7 @@ class Area extends Model implements AuditableContract
         return [
             'ativo'              => 'boolean',
             'capacidade_pessoas' => 'integer',
+            'duracao_slot_min'   => 'integer',
         ];
     }
 
@@ -108,19 +111,67 @@ class Area extends Model implements AuditableContract
         );
     }
 
+    public function configDiasCached(): array
+    {
+        return Cache::tags(self::CACHE_TAG)->remember(
+            "area:{$this->id}:config_dias",
+            3600,
+            fn() => $this->diasDisponiveis()
+                ->get()
+                ->mapWithKeys(fn(AreaDiaDisponivel $d) => [
+                    $d->dia_semana => [
+                        'horario_abertura'   => $d->aberturaFormatada(),
+                        'horario_fechamento' => $d->fechamentoFormatado(),
+                    ],
+                ])
+                ->toArray(),
+        );
+    }
+
     public function horariosPorDia(string $diaSemana): array
     {
         return Cache::tags(self::CACHE_TAG)->remember(
             "area:{$this->id}:horarios:{$diaSemana}",
             3600,
-            fn() => $this->horariosConfig()
-                ->where('dia_semana', $diaSemana)
-                ->where('ativo', true)
-                ->orderBy('horario')
-                ->pluck('horario')
-                ->map(fn($h) => $h instanceof \DateTimeInterface ? $h->format('H:i') : substr($h, 0, 5))
-                ->toArray(),
+            function () use ($diaSemana) {
+                $diaConfig = $this->diasDisponiveis()
+                    ->where('dia_semana', $diaSemana)
+                    ->first();
+
+                if (!$diaConfig || !$diaConfig->horario_abertura || !$diaConfig->horario_fechamento) {
+                    return [];
+                }
+
+                $todosSlots = $this->gerarSlots(
+                    $diaConfig->horario_abertura,
+                    $diaConfig->horario_fechamento,
+                    $this->duracao_slot_min ?: 60,
+                );
+
+                $bloqueados = $this->horariosConfig()
+                    ->where('dia_semana', $diaSemana)
+                    ->where('ativo', false)
+                    ->pluck('horario')
+                    ->map(fn($h) => $h instanceof \DateTimeInterface ? $h->format('H:i') : substr($h, 0, 5))
+                    ->toArray();
+
+                return array_values(array_diff($todosSlots, $bloqueados));
+            },
         );
+    }
+
+    public function gerarSlots(string $abertura, string $fechamento, int $duracaoMin): array
+    {
+        $slots = [];
+        $atual = Carbon::createFromFormat('H:i', substr($abertura, 0, 5));
+        $fim = Carbon::createFromFormat('H:i', substr($fechamento, 0, 5));
+
+        while ($atual <= $fim) {
+            $slots[] = $atual->format('H:i');
+            $atual->addMinutes($duracaoMin);
+        }
+
+        return $slots;
     }
 
     public function todosHorariosCached(): array

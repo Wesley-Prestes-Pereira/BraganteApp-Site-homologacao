@@ -2,7 +2,7 @@
 
 namespace Database\Seeders;
 
-use App\Models\{Area, AreaDiaDisponivel, AreaHorario, TipoArea};
+use App\Models\{Area, AreaDiaDisponivel, TipoArea};
 use Illuminate\Database\Seeder;
 
 class AreaSeeder extends Seeder
@@ -30,10 +30,10 @@ class AreaSeeder extends Seeder
             'descricao'          => 'Grama sintética',
             'capacidade_pessoas' => 30,
             'modo_reserva'       => 'HORARIO',
+            'duracao_slot_min'   => 60,
         ]);
 
-        $this->popularDias($area->id, self::TODOS_DIAS);
-        $this->popularHorarios($area->id, self::TODOS_DIAS, 7, 23, 0);
+        $this->popularDias($area->id, self::TODOS_DIAS, '07:00', '23:00');
     }
 
     private function criarQuadra2(int $tipoId): void
@@ -43,11 +43,11 @@ class AreaSeeder extends Seeder
             'descricao'          => 'Grama sintética',
             'capacidade_pessoas' => 30,
             'modo_reserva'       => 'HORARIO',
+            'duracao_slot_min'   => 60,
         ]);
 
-        $this->popularDias($area->id, self::TODOS_DIAS);
-        $this->popularHorarios($area->id, self::SEMANA, 7, 23, 20);
-        $this->popularHorarios($area->id, self::FDS, 7, 23, 0);
+        $this->popularDias($area->id, self::SEMANA, '07:20', '23:20');
+        $this->popularDias($area->id, self::FDS, '07:00', '23:00');
     }
 
     private function criarQuadraFutsal(int $tipoId): void
@@ -57,11 +57,11 @@ class AreaSeeder extends Seeder
             'descricao'          => 'Grama natural',
             'capacidade_pessoas' => 20,
             'modo_reserva'       => 'HORARIO',
+            'duracao_slot_min'   => 60,
         ]);
 
-        $this->popularDias($area->id, self::TODOS_DIAS);
-        $this->popularHorarios($area->id, self::SEMANA, 7, 23, 20);
-        $this->popularHorarios($area->id, self::FDS, 7, 23, 0);
+        $this->popularDias($area->id, self::SEMANA, '07:20', '23:20');
+        $this->popularDias($area->id, self::FDS, '07:00', '23:00');
     }
 
     private function criarChurrasqueiras(int $churrasId): void
@@ -76,27 +76,13 @@ class AreaSeeder extends Seeder
         }
     }
 
-    private function popularDias(int $areaId, array $dias): void
+    private function popularDias(int $areaId, array $dias, ?string $abertura = null, ?string $fechamento = null): void
     {
         foreach ($dias as $dia) {
-            AreaDiaDisponivel::firstOrCreate([
-                'area_id'    => $areaId,
-                'dia_semana' => $dia,
-            ]);
-        }
-    }
-
-    private function popularHorarios(int $areaId, array $dias, int $horaInicio, int $horaFim, int $minuto): void
-    {
-        foreach ($dias as $dia) {
-            for ($h = $horaInicio; $h <= $horaFim; $h++) {
-                $horario = str_pad($h, 2, '0', STR_PAD_LEFT) . ':' . str_pad($minuto, 2, '0', STR_PAD_LEFT);
-                AreaHorario::firstOrCreate([
-                    'area_id'    => $areaId,
-                    'dia_semana' => $dia,
-                    'horario'    => $horario,
-                ]);
-            }
+            AreaDiaDisponivel::firstOrCreate(
+                ['area_id' => $areaId, 'dia_semana' => $dia],
+                ['horario_abertura' => $abertura, 'horario_fechamento' => $fechamento],
+            );
         }
     }
 }
