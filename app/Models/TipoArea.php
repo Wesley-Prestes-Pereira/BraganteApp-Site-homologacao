@@ -41,6 +41,13 @@ class TipoArea extends Model implements AuditableContract
         return $this->areas()->withTrashed()->exists();
     }
 
+    public function temReservas(): bool
+    {
+        return $this->areas()->withTrashed()
+            ->whereHas('reservas', fn($q) => $q->withTrashed())
+            ->exists();
+    }
+
     public static function allCached()
     {
         return Cache::tags(self::CACHE_TAG)->remember(

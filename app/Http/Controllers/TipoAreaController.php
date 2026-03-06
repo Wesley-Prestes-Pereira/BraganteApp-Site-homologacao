@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\TipoArea;
 use Illuminate\Http\{JsonResponse, Request};
+use Illuminate\Support\Facades\DB;
 
 class TipoAreaController extends Controller
 {
@@ -53,13 +54,22 @@ class TipoAreaController extends Controller
     {
         $tipo = TipoArea::findOrFail($id);
 
-        if ($tipo->temVinculo()) {
+        if ($tipo->temReservas()) {
             return response()->json([
-                'message' => 'Este tipo possui áreas vinculadas. Desative-o ao invés de excluir.',
+                'message' => 'Este tipo possui áreas com reservas vinculadas. Para excluir, remova primeiro todas as reservas das áreas deste tipo.',
             ], 422);
         }
 
-        $tipo->delete();
+        DB::transaction(function () use ($tipo) {
+            $tipo->areas()->withTrashed()->each(function ($area) {
+                $area->horariosConfig()->delete();
+                $area->diasDisponiveis()->delete();
+                $area->areaTaxas()->delete();
+                $area->valores()->forceDelete();
+                $area->forceDelete();
+            });
+            $tipo->forceDelete();
+        });
 
         return response()->json(['message' => 'Tipo de área excluído']);
     }

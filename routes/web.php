@@ -30,6 +30,7 @@ Route::middleware(['auth'])->group(function () {
 
     Route::controller(AreaController::class)->prefix('areas')->group(function () {
         Route::get('/', 'index')->middleware('permission:areas.ver')->name('areas.index');
+        Route::get('/tipo/{tipoAreaId}', 'porTipo')->middleware('permission:areas.ver')->name('areas.porTipo');
         Route::post('/', 'store')->middleware('permission:areas.criar')->name('areas.store');
         Route::put('/{id}', 'update')->middleware('permission:areas.editar')->name('areas.update');
         Route::patch('/{id}/toggle', 'toggleStatus')->middleware('permission:areas.editar')->name('areas.toggle');

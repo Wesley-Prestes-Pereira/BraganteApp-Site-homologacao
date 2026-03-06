@@ -98,7 +98,7 @@ class HistoricoController extends Controller
         'App\\Models\\TipoArea'         => 'Tipo de Área',
         'App\\Models\\AreaHorario'      => 'Horário de Área',
         'App\\Models\\AreaDiaDisponivel' => 'Dia Disponível',
-        'App\\Models\\AreaTaxa'         => 'Taxa de Área',
+        'App\\Models\\'         => 'Taxa de Área',
         'App\\Models\\ReservaTaxa'      => 'Taxa de Reserva',
         'App\\Models\\Recurso'          => 'Área',
     ];

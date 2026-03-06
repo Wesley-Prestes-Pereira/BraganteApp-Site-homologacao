@@ -10,41 +10,87 @@ class AreaController extends Controller
 {
     public function index()
     {
-        $areas = Area::with('tipoArea')
+        $isAdmin = auth()->user()->hasRole('admin');
+
+        $query = TipoArea::query();
+        if (!$isAdmin) {
+            $query->where('ativo', true);
+        }
+
+        $tipos = $query
+            ->withCount(['areas as areas_ativas_count' => fn($q) => $q->where('ativo', true)])
+            ->withCount(['areas as areas_total_count'])
+            ->orderBy('nome')
+            ->get();
+
+        $reservasPorTipo = DB::table('reservas')
+            ->join('areas', 'areas.id', '=', 'reservas.area_id')
+            ->whereNull('reservas.deleted_at')
+            ->selectRaw('areas.tipo_area_id, COUNT(*) as total')
+            ->groupBy('areas.tipo_area_id')
+            ->pluck('total', 'tipo_area_id');
+
+        $tiposComReservas = TipoArea::whereHas(
+            'areas',
+            fn($q) =>
+            $q->withTrashed()->whereHas('reservas', fn($r) => $r->withTrashed())
+        )->pluck('id');
+
+        $tipos->each(function ($tipo) use ($reservasPorTipo, $tiposComReservas) {
+            $tipo->total_reservas = $reservasPorTipo[$tipo->id] ?? 0;
+            $tipo->pode_excluir = !$tiposComReservas->contains($tipo->id);
+        });
+
+        return view('areas.index', [
+            'tipos'   => $tipos,
+            'isAdmin' => $isAdmin,
+        ]);
+    }
+
+    public function porTipo(int $tipoAreaId)
+    {
+        $isAdmin = auth()->user()->hasRole('admin');
+
+        $tipo = TipoArea::query()
+            ->when(!$isAdmin, fn($q) => $q->where('ativo', true))
+            ->findOrFail($tipoAreaId);
+
+        $areas = Area::where('tipo_area_id', $tipoAreaId)
+            ->when(!$isAdmin, fn($q) => $q->where('ativo', true))
             ->withCount(['reservas' => fn($q) => $q->withoutTrashed()])
-            ->orderBy('tipo_area_id')
             ->orderBy('nome')
             ->get();
 
         $tiposArea = TipoArea::allCached();
-        $grupos = $areas->groupBy('tipo_area_id');
 
         $diasAbrev = [
-            'SEGUNDA' => 'SEG', 'TERCA' => 'TER', 'QUARTA' => 'QUA',
-            'QUINTA' => 'QUI', 'SEXTA' => 'SEX', 'SABADO' => 'SÁB', 'DOMINGO' => 'DOM',
+            'SEGUNDA' => 'SEG',
+            'TERCA' => 'TER',
+            'QUARTA' => 'QUA',
+            'QUINTA' => 'QUI',
+            'SEXTA' => 'SEX',
+            'SABADO' => 'SÁB',
+            'DOMINGO' => 'DOM',
         ];
         $todosDias = ['SEGUNDA', 'TERCA', 'QUARTA', 'QUINTA', 'SEXTA', 'SABADO', 'DOMINGO'];
 
-        $areasProcessadas = $areas->map(function ($area) use ($todosDias, $diasAbrev) {
+        $areasComReservas = Area::where('tipo_area_id', $tipoAreaId)
+            ->whereHas('reservas', fn($q) => $q->withTrashed())
+            ->pluck('id');
+
+        $areasProcessadas = $areas->map(function ($area) use ($todosDias, $areasComReservas) {
             $area->dias_lista = $area->diasCached();
-            $area->dias_abrev = $diasAbrev;
-            $area->todos_dias = $todosDias;
+            $area->pode_excluir = !$areasComReservas->contains($area->id);
             return $area;
         });
 
-        $gruposProcessados = $tiposArea->map(fn($tipo) => (object) [
-            'tipo'  => $tipo,
-            'areas' => $areasProcessadas->filter(fn($a) => $a->tipo_area_id === $tipo->id)->values(),
-        ])->filter(fn($g) => $g->areas->isNotEmpty())->values();
-
-        return view('areas.index', [
-            'areas'       => $areasProcessadas,
-            'tiposArea'   => $tiposArea,
-            'grupos'      => $gruposProcessados,
-            'diasAbrev'   => $diasAbrev,
-            'todosDias'   => $todosDias,
-            'totalAreas'  => $areas->count(),
-            'inativas'    => $areas->where('ativo', false)->count(),
+        return view('areas.tipo', [
+            'tipo'      => $tipo,
+            'areas'     => $areasProcessadas,
+            'tiposArea' => $tiposArea,
+            'diasAbrev' => $diasAbrev,
+            'todosDias' => $todosDias,
+            'isAdmin'   => $isAdmin,
         ]);
     }
 
@@ -117,7 +163,7 @@ class AreaController extends Controller
 
         if ($area->temVinculo()) {
             return response()->json([
-                'message' => 'Esta área possui reservas vinculadas. Desative-a ao invés de excluir.',
+                'message' => 'Esta área possui reservas vinculadas. Para excluir, remova primeiro todas as reservas desta área.',
             ], 422);
         }
 
@@ -169,22 +215,19 @@ class AreaController extends Controller
             'horarios'              => 'required|array',
             'horarios.*.dia_semana' => 'required|in:DOMINGO,SEGUNDA,TERCA,QUARTA,QUINTA,SEXTA,SABADO',
             'horarios.*.horario'    => 'required|date_format:H:i',
-            'horarios.*.ativo'      => 'required|boolean',
+            'horarios.*.ativo'      => 'boolean',
         ]);
 
         DB::transaction(function () use ($area, $validated) {
-            foreach ($validated['horarios'] as $item) {
-                AreaHorario::withTrashed()->updateOrCreate(
-                    [
-                        'area_id'    => $area->id,
-                        'dia_semana' => $item['dia_semana'],
-                        'horario'    => $item['horario'],
-                    ],
-                    [
-                        'ativo'      => $item['ativo'],
-                        'deleted_at' => null,
-                    ],
-                );
+            $area->horariosConfig()->delete();
+
+            foreach ($validated['horarios'] as $h) {
+                AreaHorario::create([
+                    'area_id'    => $area->id,
+                    'dia_semana' => $h['dia_semana'],
+                    'horario'    => $h['horario'],
+                    'ativo'      => $h['ativo'] ?? true,
+                ]);
             }
         });
 
@@ -202,10 +245,7 @@ class AreaController extends Controller
             'dias.*' => 'in:DOMINGO,SEGUNDA,TERCA,QUARTA,QUINTA,SEXTA,SABADO',
         ]);
 
-        DB::transaction(function () use ($area, $validated) {
-            $this->syncDiasInterno($area, $validated['dias']);
-        });
-
+        $this->syncDiasInterno($area, $validated['dias']);
         Area::limparCache();
 
         return response()->json(['message' => 'Dias atualizados']);
@@ -213,10 +253,10 @@ class AreaController extends Controller
 
     private function syncDiasInterno(Area $area, array $dias): void
     {
-        $area->diasDisponiveis()->whereNotIn('dia_semana', $dias)->delete();
+        $area->diasDisponiveis()->delete();
 
         foreach ($dias as $dia) {
-            AreaDiaDisponivel::firstOrCreate([
+            AreaDiaDisponivel::create([
                 'area_id'    => $area->id,
                 'dia_semana' => $dia,
             ]);
@@ -227,10 +267,11 @@ class AreaController extends Controller
     {
         foreach ($dias as $dia) {
             foreach ($horarios as $horario) {
-                AreaHorario::firstOrCreate([
+                AreaHorario::create([
                     'area_id'    => $area->id,
                     'dia_semana' => $dia,
                     'horario'    => $horario,
+                    'ativo'      => true,
                 ]);
             }
         }
