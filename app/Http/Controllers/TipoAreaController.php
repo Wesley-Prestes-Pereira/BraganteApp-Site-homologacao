@@ -62,10 +62,10 @@ class TipoAreaController extends Controller
 
         DB::transaction(function () use ($tipo) {
             $tipo->areas()->withTrashed()->each(function ($area) {
-                $area->horariosConfig()->delete();
+                $area->horariosConfig()->withTrashed()->forceDelete();
                 $area->diasDisponiveis()->delete();
                 $area->areaTaxas()->delete();
-                $area->valores()->forceDelete();
+                $area->valores()->withTrashed()->forceDelete();
                 $area->forceDelete();
             });
             $tipo->forceDelete();

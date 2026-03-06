@@ -718,7 +718,7 @@
                                 </button>
                                 @if ($tipo->ativo)
                                     <button class="tp-card__drop-item tp-card__drop-item--warning"
-                                        onclick="confirmarDesativar(event, {{ $tipo->id }}, '{{ $tipo->nome }}')">
+                                        onclick="confirmarDesativar(event, {{ $tipo->id }}, {{ Js::from($tipo->nome) }})">
                                         <i class="fi fi-rr-ban"></i> Desativar
                                     </button>
                                 @else
@@ -729,8 +729,13 @@
                                 @endif
                                 @if ($tipo->pode_excluir)
                                     <button class="tp-card__drop-item tp-card__drop-item--danger"
-                                        onclick="confirmarExcluir(event, {{ $tipo->id }}, '{{ $tipo->nome }}', {{ $tipo->areas_total_count }})">
+                                        onclick="confirmarExcluir(event, {{ $tipo->id }}, {{ Js::from($tipo->nome) }}, {{ $tipo->areas_total_count }})">
                                         <i class="fi fi-rr-trash"></i> Excluir
+                                    </button>
+                                @else
+                                    <button class="tp-card__drop-item" disabled style="opacity:.4;cursor:not-allowed"
+                                        title="Remova todas as reservas das áreas deste tipo para poder excluí-lo">
+                                        <i class="fi fi-rr-lock"></i> Excluir (possui reservas)
                                     </button>
                                 @endif
                             </div>

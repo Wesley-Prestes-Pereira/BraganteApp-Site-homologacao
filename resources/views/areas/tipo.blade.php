@@ -873,7 +873,7 @@
                                     </button>
                                     @if ($area->ativo)
                                         <button class="ar-card__drop-item ar-card__drop-item--warning"
-                                            onclick="confirmarDesativar(event, {{ $area->id }}, '{{ $area->nome }}')">
+                                            onclick="confirmarDesativar(event, {{ $area->id }}, {{ Js::from($area->nome) }})">
                                             <i class="fi fi-rr-ban"></i> Desativar
                                         </button>
                                     @else
@@ -886,8 +886,13 @@
                                 @role('admin')
                                     @if ($area->pode_excluir)
                                         <button class="ar-card__drop-item ar-card__drop-item--danger"
-                                            onclick="confirmarExcluir(event, {{ $area->id }}, '{{ $area->nome }}')">
+                                            onclick="confirmarExcluir(event, {{ $area->id }}, {{ Js::from($area->nome) }})">
                                             <i class="fi fi-rr-trash"></i> Excluir
+                                        </button>
+                                    @else
+                                        <button class="ar-card__drop-item" disabled style="opacity:.4;cursor:not-allowed"
+                                            title="Remova todas as reservas desta área para poder excluí-la">
+                                            <i class="fi fi-rr-lock"></i> Excluir (possui reservas)
                                         </button>
                                     @endif
                                 @endrole
@@ -1005,6 +1010,7 @@
             update: '{{ route('areas.update', ':id') }}',
             toggle: '{{ route('areas.toggle', ':id') }}',
             destroy: '{{ route('areas.destroy', ':id') }}',
+            horarios: '{{ route('areas.horarios', ':id') }}',
             reservas: '{{ route('reservas.index') }}'
         };
 
@@ -1134,6 +1140,32 @@
             toggleHorarios();
 
             document.getElementById('modalArea').classList.add('is-open');
+
+            if (data && data.modo_reserva === 'HORARIO') {
+                fetch(ROUTES.horarios.replace(':id', data.id), {
+                        headers: {
+                            'Accept': 'application/json'
+                        }
+                    })
+                    .then(function(r) {
+                        return r.json();
+                    })
+                    .then(function(info) {
+                        var horariosUnicos = {};
+                        var dias = Object.keys(info.horarios || {});
+                        for (var i = 0; i < dias.length; i++) {
+                            var lista = info.horarios[dias[i]];
+                            for (var j = 0; j < lista.length; j++) {
+                                horariosUnicos[lista[j]] = true;
+                            }
+                        }
+                        var ordenados = Object.keys(horariosUnicos).sort();
+                        for (var k = 0; k < ordenados.length; k++) {
+                            addHorario(ordenados[k]);
+                        }
+                    })
+                    .catch(function() {});
+            }
         }
 
         function fecharModal() {

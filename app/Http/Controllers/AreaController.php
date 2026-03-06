@@ -26,6 +26,7 @@ class AreaController extends Controller
         $reservasPorTipo = DB::table('reservas')
             ->join('areas', 'areas.id', '=', 'reservas.area_id')
             ->whereNull('reservas.deleted_at')
+            ->whereNull('areas.deleted_at')
             ->selectRaw('areas.tipo_area_id, COUNT(*) as total')
             ->groupBy('areas.tipo_area_id')
             ->pluck('total', 'tipo_area_id');
@@ -61,8 +62,6 @@ class AreaController extends Controller
             ->orderBy('nome')
             ->get();
 
-        $tiposArea = TipoArea::allCached();
-
         $diasAbrev = [
             'SEGUNDA' => 'SEG',
             'TERCA' => 'TER',
@@ -87,7 +86,6 @@ class AreaController extends Controller
         return view('areas.tipo', [
             'tipo'      => $tipo,
             'areas'     => $areasProcessadas,
-            'tiposArea' => $tiposArea,
             'diasAbrev' => $diasAbrev,
             'todosDias' => $todosDias,
             'isAdmin'   => $isAdmin,
@@ -139,11 +137,27 @@ class AreaController extends Controller
             'descricao'          => 'nullable|string|max:500',
             'capacidade_pessoas' => 'nullable|integer|min:1|max:9999',
             'modo_reserva'       => 'sometimes|in:HORARIO,DIA_INTEIRO',
+            'dias'               => 'sometimes|array|min:1',
+            'dias.*'             => 'in:DOMINGO,SEGUNDA,TERCA,QUARTA,QUINTA,SEXTA,SABADO',
+            'horarios'           => 'nullable|array',
+            'horarios.*'         => 'date_format:H:i',
         ]);
 
-        $area->update($validated);
+        DB::transaction(function () use ($area, $validated) {
+            $area->update(collect($validated)->except(['dias', 'horarios'])->toArray());
 
-        return response()->json($area->load('tipoArea'));
+            if (isset($validated['dias'])) {
+                $this->syncDiasInterno($area, $validated['dias']);
+
+                $modo = $validated['modo_reserva'] ?? $area->modo_reserva;
+                if ($modo === 'HORARIO' && !empty($validated['horarios'])) {
+                    $area->horariosConfig()->forceDelete();
+                    $this->syncHorariosInterno($area, $validated['dias'], $validated['horarios']);
+                }
+            }
+        });
+
+        return response()->json($area->fresh()->load('tipoArea'));
     }
 
     public function toggleStatus(int $id): JsonResponse
