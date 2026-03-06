@@ -941,7 +941,7 @@
         </div>
     @endif
 
-    @can('areas.criar')
+    @canany(['areas.criar', 'areas.editar'])
         <div class="modal-overlay" id="modalArea">
             <div class="modal-box">
                 <div class="modal-head" id="modalTitulo">Nova Área</div>
@@ -986,7 +986,7 @@
                 </div>
             </div>
         </div>
-    @endcan
+    @endcanany
 
     <div class="confirm-overlay" id="confirmOverlay">
         <div class="confirm-box">

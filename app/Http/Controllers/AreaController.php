@@ -149,10 +149,12 @@ class AreaController extends Controller
             if (isset($validated['dias'])) {
                 $this->syncDiasInterno($area, $validated['dias']);
 
-                $modo = $validated['modo_reserva'] ?? $area->modo_reserva;
+                $modo = $area->modo_reserva;
                 if ($modo === 'HORARIO' && !empty($validated['horarios'])) {
-                    $area->horariosConfig()->forceDelete();
+                    $area->horariosConfig()->withTrashed()->forceDelete();
                     $this->syncHorariosInterno($area, $validated['dias'], $validated['horarios']);
+                } elseif ($modo === 'DIA_INTEIRO') {
+                    $area->horariosConfig()->withTrashed()->forceDelete();
                 }
             }
         });
@@ -233,7 +235,7 @@ class AreaController extends Controller
         ]);
 
         DB::transaction(function () use ($area, $validated) {
-            $area->horariosConfig()->delete();
+            $area->horariosConfig()->withTrashed()->forceDelete();
 
             foreach ($validated['horarios'] as $h) {
                 AreaHorario::create([

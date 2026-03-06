@@ -51,39 +51,27 @@ class ReservaController extends Controller
 
     public function index(Request $request)
     {
-        $areas     = Area::allCached();
-        $areaAtiva = $request->filled('area_id')
-            ? Area::findCached((int) $request->area_id)
-            : null;
+        $areas = Area::allCached();
 
         $inicio = Carbon::now()->startOfWeek(Carbon::MONDAY);
         $fim    = $inicio->copy()->endOfWeek(Carbon::SUNDAY);
 
         $query = Reserva::with(['cliente', 'area']);
-        if ($areaAtiva) {
-            $query->where('area_id', $areaAtiva->id);
-        }
         $this->aplicarFiltroPeriodo($query, $inicio, $fim);
         $this->aplicarOrdenacao($query);
 
         $reservasIniciais = $query->get()->map(fn(Reserva $r) => $this->formatarReserva($r));
 
-        [$areaJson, $todasAreasJson, $horariosUnificadosJson] = $areaAtiva
-            ? [$this->formatarArea($areaAtiva), null, null]
-            : [null, ...$this->montarInfoAreas($areas)];
+        $todasAreasJson = $areas->map(fn(Area $a) => $this->formatarArea($a));
 
         return view('reservas.index', [
-            'areasPorTipo'           => TipoArea::allCached()->map(fn($tipo) => [
+            'areasPorTipo'   => TipoArea::allCached()->map(fn($tipo) => [
                 'tipo'  => $tipo,
                 'areas' => $areas->filter(fn($a) => $a->tipo_area_id === $tipo->id)->values(),
             ])->filter(fn($g) => $g['areas']->isNotEmpty())->values(),
-            'areaAtiva'              => $areaAtiva,
-            'areaJson'               => $areaJson,
-            'todasAreasJson'         => $todasAreasJson,
-            'horariosUnificadosJson' => $horariosUnificadosJson,
-            'reservasIniciais'       => $reservasIniciais,
-            'periodoInicio'          => $inicio->format('Y-m-d'),
-            'periodoFim'             => $fim->format('Y-m-d'),
+            'todasAreasJson'   => $todasAreasJson,
+            'reservasIniciais' => $reservasIniciais,
+            'areaIdInicial'    => $request->integer('area_id') ?: null,
         ]);
     }
 
@@ -500,54 +488,31 @@ class ReservaController extends Controller
     private function formatarReserva(Reserva $reserva): array
     {
         return [
-            'id'              => $reserva->id,
-            'area_id'         => $reserva->area_id,
-            'area_nome'       => $reserva->area?->nome,
-            'cliente_id'      => $reserva->cliente_id,
-            'cliente_nome'    => $reserva->cliente?->nome ?? '—',
+            'id'               => $reserva->id,
+            'area_id'          => $reserva->area_id,
+            'area_nome'        => $reserva->area?->nome,
+            'cliente_id'       => $reserva->cliente_id,
+            'cliente_nome'     => $reserva->cliente?->nome ?? '—',
             'cliente_telefone' => $reserva->cliente?->telefone,
-            'dia_semana'      => $reserva->dia_semana,
-            'tipo'            => $reserva->tipo,
-            'horario_inicio'  => $reserva->horario_inicio_formatado,
-            'horario_fim'     => $reserva->horario_fim_formatado,
-            'slots_ocupados'  => $reserva->slots_ocupados,
+            'dia_semana'       => $reserva->dia_semana,
+            'tipo'             => $reserva->tipo,
+            'horario_inicio'   => $reserva->horario_inicio_formatado,
+            'horario_fim'      => $reserva->horario_fim_formatado,
+            'slots_ocupados'   => $reserva->slots_ocupados,
             'duracao_real_min' => $reserva->duracao_real_min,
-            'data_reserva'    => $reserva->data_reserva?->format('Y-m-d'),
-            'data_formatada'  => $reserva->data_formatada,
-            'data_inicio'     => $reserva->data_inicio?->format('Y-m-d'),
-            'data_fim'        => $reserva->data_fim?->format('Y-m-d'),
-            'valor_unitario'  => $reserva->valor_unitario,
-            'valor_total'     => $reserva->valor_total,
-            'valor_taxas'     => $reserva->valor_taxas,
-            'desconto'        => $reserva->desconto,
-            'valor_final'     => $reserva->valor_final,
-            'num_pessoas'     => $reserva->num_pessoas,
-            'obs'             => $reserva->obs,
-            'obs_sistema'     => $reserva->obs_sistema,
+            'data_reserva'     => $reserva->data_reserva?->format('Y-m-d'),
+            'data_formatada'   => $reserva->data_formatada,
+            'data_inicio'      => $reserva->data_inicio?->format('Y-m-d'),
+            'data_fim'         => $reserva->data_fim?->format('Y-m-d'),
+            'valor_unitario'   => $reserva->valor_unitario,
+            'valor_total'      => $reserva->valor_total,
+            'valor_taxas'      => $reserva->valor_taxas,
+            'desconto'         => $reserva->desconto,
+            'valor_final'      => $reserva->valor_final,
+            'num_pessoas'      => $reserva->num_pessoas,
+            'obs'              => $reserva->obs,
+            'obs_sistema'      => $reserva->obs_sistema,
         ];
-    }
-
-    private function montarInfoAreas($areas): array
-    {
-        $todasAreas = $areas->map(fn(Area $a) => $this->formatarArea($a));
-
-        $horariosUnificados = [];
-        foreach ($areas as $area) {
-            if ($area->modo_reserva === 'HORARIO') {
-                foreach ($area->todosHorariosCached() as $dia => $horarios) {
-                    foreach ($horarios as $h) {
-                        $horariosUnificados[$dia][$h] = true;
-                    }
-                }
-            }
-        }
-
-        foreach ($horariosUnificados as $dia => &$horarios) {
-            $horarios = array_keys($horarios);
-            sort($horarios);
-        }
-
-        return [$todasAreas, $horariosUnificados];
     }
 
     private function aplicarOrdenacao($query): void

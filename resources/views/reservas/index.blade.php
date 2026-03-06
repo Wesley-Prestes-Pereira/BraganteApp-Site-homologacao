@@ -5,7 +5,7 @@
 @section('page-header')
     <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
         <div>
-            <h1 class="page-header__title" id="pageTitle">{{ $areaAtiva->nome ?? 'Todas as Áreas' }}</h1>
+            <h1 class="page-header__title" id="pageTitle">Reservas</h1>
             <p class="page-header__sub" id="pageSub"></p>
         </div>
         <div style="display:flex;align-items:center;gap:8px;">
@@ -26,274 +26,56 @@
             box-sizing: border-box;
         }
 
-        .week-grid,
-        .day-grid,
-        .month-grid {
+        .rv-panel,
+        .rv-lane {
             contain: layout style;
         }
 
-        .week-grid td,
-        .month-grid td {
-            contain: content;
-        }
-
-        .year-month {
-            contain: content;
-        }
-
-        .rv,
-        .cell-add,
-        .cell-more,
-        .month-cell,
-        .view-mode,
-        .filter-chip,
-        .period-bar__btn,
-        .act-btn,
+        .rv-chip,
+        .rv-livre,
+        .rv-tab,
+        .rv-day,
+        .rv-tipo-chip,
+        .rv-nav-btn,
+        .rv-today-btn,
+        .rv-view-btn,
         .btn-primary,
         .btn-ghost,
         .btn-danger,
-        .res,
-        .h-chip,
-        .h-btn-go,
-        .h-btn-clr {
+        .act-btn {
             touch-action: manipulation;
         }
 
-        .week-grid th,
-        .week-grid .td-hora {
-            will-change: transform;
-            backface-visibility: hidden;
-        }
-
-        :root {
-            --rv-fixa-bg: rgba(var(--accent-rgb), .08);
-            --rv-fixa-text: var(--accent);
-            --rv-fixa-border: var(--accent);
-            --rv-fixa-badge: var(--accent);
-            --rv-unica-bg: rgba(var(--warning-rgb), .08);
-            --rv-unica-text: var(--warning);
-            --rv-unica-border: var(--warning);
-            --rv-unica-badge: var(--warning);
-            --cell-border: var(--card-border);
-            --empty-bg: var(--bg);
-            --th-bg: var(--card, #0e1526);
-            --th-bg-today: var(--card, #0f1a33);
-            --td-bg: var(--card, #0c1322);
-        }
-
-        [data-theme="dark"] {
-            --accent-rgb: 91, 156, 246;
-            --warning-rgb: 251, 191, 36;
-            --th-bg: #0e1526;
-            --th-bg-today: #0f1a33;
-            --td-bg: #0c1322;
-        }
-
-        [data-theme="light"] {
-            --accent-rgb: 59, 130, 246;
-            --warning-rgb: 245, 158, 11;
-            --rv-fixa-bg: rgba(59, 130, 246, .10);
-            --rv-fixa-text: #1d4ed8;
-            --rv-unica-bg: rgba(245, 158, 11, .10);
-            --rv-unica-text: #92400e;
-            --th-bg: #f8fafc;
-            --th-bg-today: #eff6ff;
-            --td-bg: #ffffff;
-            --empty-bg: #fafbfc;
-        }
-
-        .act-btn {
-            width: 38px;
-            height: 38px;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 10px;
-            border: 1px solid var(--card-border);
-            background: var(--card);
-            color: var(--t3);
-            cursor: pointer;
-            font-size: .95rem;
-            text-decoration: none;
-        }
-
-        .act-btn:hover {
-            color: var(--t1);
-            border-color: var(--input-border-h);
-            background: var(--hover);
-        }
-
-        .area-filter {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            min-width: 0;
-        }
-
-        .area-filter__label {
-            font-size: .78rem;
-            font-weight: 600;
-            color: var(--t3);
-            white-space: nowrap;
-        }
-
-        .area-filter__select {
-            height: 36px;
-            padding: 0 32px 0 12px;
-            border-radius: 10px;
-            border: 1.5px solid var(--input-border);
-            background: var(--input-bg);
-            color: var(--t1);
-            font-family: inherit;
-            font-size: .82rem;
-            font-weight: 500;
-            cursor: pointer;
-            outline: none;
-            min-width: 160px;
-            max-width: 260px;
-            appearance: none;
-            -webkit-appearance: none;
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23888' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
-            background-repeat: no-repeat;
-            background-position: right 10px center;
-        }
-
-        .area-filter__select:hover {
-            border-color: var(--input-border-h);
-        }
-
-        .area-filter__select:focus {
-            border-color: var(--accent);
-            box-shadow: 0 0 0 3px rgba(var(--accent-rgb), .15);
-        }
-
-        .area-filter__select,
-        .sdb-select,
-        .modal-body .sdb-select,
-        .sdb-input[type="date"] {
-            color-scheme: dark;
-        }
-
-        [data-theme="light"] .area-filter__select,
-        [data-theme="light"] .sdb-select,
-        [data-theme="light"] .modal-body .sdb-select,
-        [data-theme="light"] .sdb-input[type="date"] {
-            color-scheme: light;
-        }
-
-        [data-theme="dark"] select option,
-        [data-theme="dark"] .area-filter__select option,
-        [data-theme="dark"] .sdb-select option,
-        [data-theme="dark"] .modal-body .sdb-select option {
-            background: #1a2236;
-            color: #eef2f7;
-            padding: 8px 12px;
-        }
-
-        [data-theme="dark"] select option:hover,
-        [data-theme="dark"] select option:checked,
-        [data-theme="dark"] .area-filter__select option:checked,
-        [data-theme="dark"] .sdb-select option:checked {
-            background: #2a3a56;
-            color: #fff;
-        }
-
-        [data-theme="dark"] select optgroup,
-        [data-theme="dark"] .area-filter__select optgroup,
-        [data-theme="dark"] .sdb-select optgroup,
-        [data-theme="dark"] .modal-body .sdb-select optgroup {
-            background: #111827;
-            color: #6e809a;
-            font-weight: 700;
-            font-style: normal;
-        }
-
-        [data-theme="light"] select option,
-        [data-theme="light"] .area-filter__select option,
-        [data-theme="light"] .sdb-select option,
-        [data-theme="light"] .modal-body .sdb-select option {
-            background: #ffffff;
-            color: #0f172a;
-            padding: 8px 12px;
-        }
-
-        [data-theme="light"] select option:checked,
-        [data-theme="light"] .area-filter__select option:checked,
-        [data-theme="light"] .sdb-select option:checked {
-            background: #e0edff;
-            color: #1d4ed8;
-        }
-
-        [data-theme="light"] select optgroup,
-        [data-theme="light"] .area-filter__select optgroup,
-        [data-theme="light"] .sdb-select optgroup,
-        [data-theme="light"] .modal-body .sdb-select optgroup {
-            background: #f1f5f9;
-            color: #475569;
-            font-weight: 700;
-            font-style: normal;
-        }
-
-        .toolbar {
-            display: flex;
-            flex-wrap: wrap;
-            align-items: center;
-            gap: 10px;
-            padding: 10px 14px;
-            margin-bottom: 14px;
+        .rv-toolbar {
             background: var(--card);
             border: 1px solid var(--card-border);
             border-radius: 14px;
+            padding: 14px 16px;
+            margin-bottom: 16px;
+            transition: background .35s ease, border-color .35s ease;
         }
 
-        .toolbar__sep {
+        .rv-toolbar__row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .rv-toolbar__row+.rv-toolbar__row {
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px solid var(--card-border);
+        }
+
+        .rv-toolbar__sep {
             width: 1px;
-            height: 28px;
+            height: 24px;
             background: var(--card-border);
+            flex-shrink: 0;
         }
 
-        .toolbar .sdb-input {
-            max-width: 180px;
-            height: 36px;
-            font-size: .82rem;
-            padding: 0 12px;
-            background: var(--input-bg);
-            border: 1.5px solid var(--input-border);
-            border-radius: 10px;
-            color: var(--t1);
-            font-family: inherit;
-            font-weight: 500;
-            outline: none;
-        }
-
-        .toolbar .sdb-input:focus {
-            border-color: var(--input-focus);
-            box-shadow: 0 0 0 3px var(--input-glow);
-        }
-
-        [data-theme="dark"] .toolbar .sdb-input {
-            background: rgba(255, 255, 255, .06);
-            border-color: rgba(255, 255, 255, .10);
-            color: #eef2f7;
-        }
-
-        [data-theme="dark"] .toolbar .sdb-input:focus {
-            background: rgba(255, 255, 255, .08);
-            border-color: var(--accent);
-            box-shadow: 0 0 0 3px rgba(91, 156, 246, .15);
-        }
-
-        [data-theme="dark"] .sdb-input::placeholder,
-        [data-theme="dark"] .modal-body .sdb-input::placeholder {
-            color: #4a5a74;
-        }
-
-        [data-theme="light"] .sdb-input::placeholder,
-        [data-theme="light"] .modal-body .sdb-input::placeholder {
-            color: #94a3b8;
-        }
-
-        .view-modes {
+        .rv-tabs {
             display: inline-flex;
             gap: 2px;
             background: var(--bg);
@@ -301,579 +83,750 @@
             padding: 3px;
         }
 
-        .view-mode {
-            padding: 6px 14px;
+        .rv-tab {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 7px 16px;
             border: none;
             background: transparent;
             color: var(--t3);
             font-family: inherit;
-            font-size: .8rem;
+            font-size: .82rem;
             font-weight: 500;
             border-radius: 8px;
             cursor: pointer;
+            transition: all .15s;
         }
 
-        .view-mode:hover {
+        .rv-tab:hover {
             color: var(--t1);
         }
 
-        .view-mode.active {
+        .rv-tab.active {
             background: var(--card);
             color: var(--t1);
             font-weight: 600;
             box-shadow: 0 1px 3px rgba(0, 0, 0, .08);
         }
 
-        [data-theme="dark"] .view-mode.active {
-            border-color: rgba(255, 255, 255, .10);
+        [data-theme="dark"] .rv-tab.active {
             background: var(--accent);
+            color: #fff;
         }
 
-        .filter-chip {
+        .rv-tipo-chips {
+            display: inline-flex;
+            gap: 3px;
+        }
+
+        .rv-tipo-chip {
             display: inline-flex;
             align-items: center;
             gap: 5px;
-            padding: 6px 12px;
+            height: 34px;
+            padding: 0 12px;
             border-radius: 8px;
             border: 1px solid var(--card-border);
             background: transparent;
-            color: var(--t2);
+            color: var(--t3);
             font-family: inherit;
             font-size: .78rem;
-            font-weight: 500;
+            font-weight: 600;
             cursor: pointer;
+            transition: all .15s;
+            white-space: nowrap;
         }
 
-        .filter-chip:hover {
+        .rv-tipo-chip:hover {
             border-color: var(--accent);
             color: var(--accent);
         }
 
-        .filter-chip.active {
-            background: var(--accent);
+        .rv-tipo-chip.active {
+            color: var(--accent);
             border-color: var(--accent);
-            color: #fff;
+            background: rgba(91, 156, 246, .08);
         }
 
-        [data-theme="dark"] .filter-chip {
+        [data-theme="light"] .rv-tipo-chip.active {
+            background: rgba(59, 130, 246, .06);
+        }
+
+        .rv-tipo-chip i {
+            font-size: .82rem;
+        }
+
+        .rv-search {
+            height: 34px;
+            flex: 1;
+            min-width: 200px;
+            padding: 0 12px;
+            border-radius: 8px;
+            border: 1px solid var(--card-border);
+            background: var(--bg);
+            color: var(--t1);
+            font-family: inherit;
+            font-size: .82rem;
+            outline: none;
+            transition: border-color .15s;
+        }
+
+        .rv-search:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px var(--input-glow, rgba(91, 156, 246, .12));
+        }
+
+        [data-theme="dark"] .rv-search {
+            background: rgba(255, 255, 255, .06);
             border-color: rgba(255, 255, 255, .10);
         }
 
-        [data-theme="light"] .filter-chip {
-            border-color: rgba(0, 0, 0, .12);
-        }
-
-        .period-bar {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            padding: 8px 14px;
-            margin-bottom: 14px;
-            background: var(--card);
-            border: 1px solid var(--card-border);
-            border-radius: 12px;
-            font-size: .82rem;
-            flex-wrap: wrap;
-        }
-
-        [data-theme="dark"] .period-bar {
-            background: #0c1322;
-        }
-
-        .period-bar__label {
-            font-weight: 700;
-            color: var(--t1);
-            white-space: nowrap;
-        }
-
-        .period-bar__divider {
-            width: 1px;
-            height: 20px;
-            background: var(--card-border);
-        }
-
-        .period-bar__btn {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            width: 30px;
-            height: 30px;
+        .rv-nav-btn {
+            width: 32px;
+            height: 32px;
             border-radius: 8px;
             border: 1px solid var(--card-border);
             background: transparent;
             color: var(--t2);
             cursor: pointer;
-            font-size: .8rem;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: .85rem;
+            transition: all .15s;
         }
 
-        .period-bar__btn:hover {
-            background: var(--hover);
+        .rv-nav-btn:hover {
+            border-color: var(--accent);
             color: var(--accent);
         }
 
-        .period-bar__today {
-            padding: 4px 10px;
-            border-radius: 8px;
+        .rv-week-label {
+            font-size: .86rem;
+            font-weight: 700;
+            color: var(--t1);
+            min-width: 180px;
+            text-align: center;
+        }
+
+        .rv-today-btn {
+            padding: 4px 12px;
+            border-radius: 7px;
             border: 1px solid var(--accent);
             background: transparent;
             color: var(--accent);
-            cursor: pointer;
             font-family: inherit;
             font-size: .78rem;
             font-weight: 600;
+            cursor: pointer;
+            transition: all .15s;
         }
 
-        .period-bar__today:hover {
+        .rv-today-btn:hover {
             background: var(--accent);
             color: #fff;
         }
 
-        .period-bar__count {
-            font-size: .75rem;
-            color: var(--t3);
-        }
-
-        [data-theme="dark"] .period-bar__count {
-            color: #6e809a;
-        }
-
-        .week-grid {
-            background: var(--card);
-            border: 1px solid var(--card-border);
-            border-radius: 14px;
-            overflow: auto;
-        }
-
-        .week-grid table {
-            width: 100%;
-            border-collapse: collapse;
-            min-width: 700px;
-            table-layout: fixed;
-        }
-
-        .week-grid th {
-            padding: 10px 8px;
-            text-align: center;
-            font-size: .75rem;
-            font-weight: 600;
-            color: var(--t2);
-            text-transform: uppercase;
-            letter-spacing: .3px;
-            background: var(--th-bg);
-            border-bottom: 1px solid var(--cell-border);
-            position: sticky;
-            top: 0;
-            z-index: 2;
-        }
-
-        .week-grid th:first-child {
-            position: sticky;
-            left: 0;
-            z-index: 4;
-            width: 70px;
-            min-width: 70px;
-            max-width: 70px;
-            background: var(--th-bg);
-        }
-
-        .week-grid th small {
-            display: block;
-            font-weight: 500;
-            font-size: .68rem;
-            margin-top: 2px;
-            opacity: .75;
-        }
-
-        .week-grid th.th-today {
-            color: var(--accent);
-            background: var(--th-bg-today);
-        }
-
-        .week-grid td {
-            padding: 4px 6px;
-            border-bottom: 1px solid var(--card-border);
-            border-right: 1px solid var(--card-border);
-            vertical-align: top;
-            min-height: 50px;
-            background: var(--td-bg);
-        }
-
-        .week-grid td:last-child {
-            border-right: none;
-        }
-
-        .week-grid tr:last-child td {
-            border-bottom: none;
-        }
-
-        .week-grid .td-hora {
-            font-size: .82rem;
-            font-weight: 600;
-            color: var(--t1);
-            background: var(--th-bg);
-            white-space: nowrap;
-            text-align: center;
-            position: sticky;
-            left: 0;
-            z-index: 3;
-            width: 70px;
-            min-width: 70px;
-            max-width: 70px;
-            vertical-align: middle;
-            border-right: 2px solid var(--cell-border);
-        }
-
-        .day-grid {
-            background: var(--card);
-            border: 1px solid var(--card-border);
-            border-radius: 14px;
-            overflow: clip;
-        }
-
-        .day-slot {
+        .rv-days {
             display: flex;
-            gap: 12px;
-            padding: 10px 16px;
-            border-bottom: 1px solid var(--cell-border);
-            min-height: 56px;
+            gap: 6px;
+            margin-bottom: 14px;
+            overflow-x: auto;
+            padding-bottom: 2px;
         }
 
-        .day-slot:last-child {
-            border-bottom: none;
-        }
-
-        .day-slot:hover {
-            background: var(--hover);
-        }
-
-        .day-slot__hora {
-            font-size: .85rem;
-            font-weight: 600;
-            color: var(--t1);
-            min-width: 55px;
-            padding-top: 4px;
-        }
-
-        .day-slot__body {
-            flex: 1;
+        .rv-day {
             display: flex;
             flex-direction: column;
-            gap: 4px;
+            align-items: center;
+            gap: 2px;
+            padding: 8px 14px;
+            border-radius: 12px;
+            border: 1px solid var(--card-border);
+            background: var(--card);
+            cursor: pointer;
+            transition: all .15s;
+            min-width: 56px;
+            position: relative;
+        }
+
+        .rv-day:hover {
+            border-color: var(--accent);
+        }
+
+        .rv-day.active {
+            background: var(--accent);
+            border-color: var(--accent);
+            color: #fff;
+            box-shadow: 0 2px 8px rgba(91, 156, 246, .3);
+        }
+
+        .rv-day.today:not(.active) {
+            border-color: var(--accent);
+            background: rgba(91, 156, 246, .06);
+        }
+
+        .rv-day__abbr {
+            font-size: .68rem;
+            font-weight: 700;
+            letter-spacing: .5px;
+            text-transform: uppercase;
+        }
+
+        .rv-day__num {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--t1);
+        }
+
+        .rv-day.active .rv-day__num {
+            color: #fff;
+            opacity: .9;
+        }
+
+        .rv-day__count {
+            font-size: .58rem;
+            font-weight: 700;
+            background: var(--bg);
+            color: var(--t3);
+            border-radius: 4px;
+            padding: 1px 5px;
+        }
+
+        .rv-day.active .rv-day__count {
+            background: rgba(255, 255, 255, .25);
+            color: #fff;
+        }
+
+        .rv-stats {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 14px;
+        }
+
+        .rv-stat {
+            flex: 1;
+            background: var(--card);
+            border: 1px solid var(--card-border);
+            border-radius: 10px;
+            padding: 10px 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .rv-stat__num {
+            font-size: 1.15rem;
+            font-weight: 800;
+            color: var(--t1);
+        }
+
+        .rv-stat__label {
+            font-size: .76rem;
+            color: var(--t3);
+            font-weight: 500;
+        }
+
+        .rv-stat--green {
+            border-left: 3px solid var(--success, #22c55e);
+        }
+
+        .rv-stat--blue {
+            border-left: 3px solid var(--accent);
+        }
+
+        .rv-stat--amber {
+            border-left: 3px solid var(--warning, #f59e0b);
+        }
+
+        .rv-lanes {
+            display: flex;
+            gap: 12px;
+            overflow-x: auto;
+            align-items: flex-start;
+            padding-bottom: 4px;
+        }
+
+        .rv-lane {
+            flex: 1;
+            min-width: 180px;
+            max-width: 340px;
+            background: var(--card);
+            border: 1px solid var(--card-border);
+            border-radius: 14px;
+            overflow: hidden;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, .04);
+        }
+
+        .rv-lane__head {
+            padding: 12px 14px;
+            border-bottom: 2px solid var(--card-border);
+            background: var(--bg);
+        }
+
+        .rv-lane__name {
+            font-weight: 700;
+            font-size: .88rem;
+            color: var(--t1);
+        }
+
+        .rv-lane__desc {
+            font-size: .7rem;
+            color: var(--t4, #94a3b8);
+            margin-top: 1px;
+        }
+
+        .rv-lane__body {
+            max-height: 520px;
+            overflow-y: auto;
+        }
+
+        .rv-lane__foot {
+            padding: 8px 14px;
+            border-top: 1px solid var(--card-border);
+            font-size: .72rem;
+            color: var(--t4, #94a3b8);
+            font-weight: 600;
+            text-align: center;
+            background: var(--bg);
+        }
+
+        .rv-slot {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 5px 10px;
+            border-bottom: 1px solid var(--card-border);
+            min-height: 40px;
+        }
+
+        .rv-slot:last-child {
+            border-bottom: none;
+        }
+
+        .rv-slot:hover {
+            background: var(--hover, rgba(0, 0, 0, .02));
+        }
+
+        .rv-slot__time {
+            font-size: .78rem;
+            font-weight: 600;
+            color: var(--t2);
+            min-width: 42px;
+            flex-shrink: 0;
+        }
+
+        .rv-slot__body {
+            flex: 1;
             min-width: 0;
         }
 
-        .day-slot__empty {
-            color: var(--t4);
-            font-size: .78rem;
-            font-style: italic;
-            padding-top: 4px;
+        .rv-slot--today {
+            background: rgba(91, 156, 246, .04);
         }
 
-        .month-grid {
-            background: var(--card);
-            border: 1px solid var(--card-border);
-            border-radius: 14px;
-            overflow: clip;
+        .rv-slot--today .rv-slot__time {
+            color: var(--accent);
+            font-weight: 700;
         }
 
-        .month-grid table {
+        .rv-chip {
+            display: flex;
+            align-items: center;
+            gap: 5px;
             width: 100%;
-            border-collapse: collapse;
-        }
-
-        .month-grid th {
-            padding: 10px 4px;
-            text-align: center;
-            font-size: .72rem;
-            font-weight: 600;
-            color: var(--t3);
-            text-transform: uppercase;
-            letter-spacing: .5px;
-            background: var(--th-bg);
-            border-bottom: 1px solid var(--cell-border);
-            position: sticky;
-            top: 0;
-            z-index: 2;
-        }
-
-        .month-grid td {
-            width: 14.28%;
-            padding: 6px;
-            border-bottom: 1px solid var(--card-border);
-            border-right: 1px solid var(--card-border);
-            vertical-align: top;
-            min-height: 80px;
-            height: 80px;
-            background: var(--td-bg);
-        }
-
-        .month-grid td:last-child {
-            border-right: none;
-        }
-
-        .month-grid tr:last-child td {
-            border-bottom: none;
-        }
-
-        .month-cell {
-            cursor: pointer;
-            transition: background .15s;
-        }
-
-        .month-cell:hover {
-            background: var(--hover);
-        }
-
-        .month-grid .month-cell--empty {
-            background: var(--empty-bg);
-            cursor: default;
-        }
-
-        .month-day {
-            font-weight: 600;
-            font-size: .78rem;
-            color: var(--t1);
-            margin-bottom: 4px;
-        }
-
-        .month-day--today {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            width: 24px;
-            height: 24px;
-            border-radius: 50%;
-            background: var(--accent);
-            color: #fff;
-        }
-
-        .month-count {
-            font-size: .68rem;
-            padding: 2px 6px;
-            border-radius: 4px;
-            display: inline-block;
-            margin-top: 2px;
-        }
-
-        .month-count--fixa {
-            background: rgba(91, 156, 246, .12);
-            color: var(--accent);
-        }
-
-        .month-count--unica {
-            background: rgba(251, 191, 36, .12);
-            color: var(--warning);
-        }
-
-        .year-grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 12px;
-        }
-
-        .year-month {
-            background: var(--card);
-            border: 1px solid var(--card-border);
-            border-radius: 12px;
-            overflow: hidden;
-            cursor: pointer;
-            transition: transform .2s, border-color .2s, box-shadow .2s;
-        }
-
-        .year-month:hover {
-            border-color: var(--accent);
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, .08);
-        }
-
-        .year-month--current {
-            border-color: var(--accent);
-            box-shadow: 0 0 0 1px var(--accent);
-        }
-
-        .year-month__head {
-            padding: 8px 12px;
-            font-size: .82rem;
-            font-weight: 600;
-            color: var(--t1);
-            background: var(--bg);
-            border-bottom: 1px solid var(--card-border);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .year-month__count {
-            font-size: .7rem;
-            font-weight: 500;
-            color: var(--t3);
-        }
-
-        .year-month__body {
-            padding: 8px;
-        }
-
-        .year-mini-grid {
-            display: grid;
-            grid-template-columns: repeat(7, 1fr);
-            gap: 1px;
-            font-size: .6rem;
-            text-align: center;
-        }
-
-        .year-mini-grid__hdr {
-            font-size: .6rem;
-            font-weight: 700;
-            color: var(--t3);
-            padding: 2px 0;
-        }
-
-        .year-mini-day {
-            font-size: .62rem;
-            padding: 2px 0;
-            border-radius: 3px;
-            color: var(--t2);
-        }
-
-        .year-mini-day--empty {
-            color: transparent;
-        }
-
-        .year-mini-day--today {
-            background: var(--accent);
-            color: #fff;
-            font-weight: 700;
-        }
-
-        .year-mini-day--has {
-            background: rgba(91, 156, 246, .3);
-            color: var(--accent);
-            font-weight: 700;
-        }
-
-        .year-month__stats {
-            display: flex;
-            gap: 8px;
-            padding: 6px 12px;
-            border-top: 1px solid var(--card-border);
-        }
-
-        .year-month__stat {
-            font-size: .68rem;
-            font-weight: 600;
-            padding: 2px 7px;
-            border-radius: 4px;
-        }
-
-        .year-month__stat--fixa {
-            background: rgba(91, 156, 246, .12);
-            color: var(--accent);
-        }
-
-        .year-month__stat--unica {
-            background: rgba(251, 191, 36, .12);
-            color: var(--warning);
-        }
-
-        .rv {
-            display: flex;
-            align-items: center;
-            gap: 6px;
             padding: 5px 8px;
             border-radius: 8px;
-            margin-bottom: 4px;
-            font-size: .78rem;
+            border: 1px solid;
             cursor: pointer;
-            max-width: 100%;
+            font-family: inherit;
+            font-size: .76rem;
+            font-weight: 600;
+            text-align: left;
+            white-space: nowrap;
             overflow: hidden;
-            border-left: 3px solid transparent;
-            transition: opacity .15s, transform .15s;
+            transition: all .12s;
+            background: var(--rv-fixa-bg);
+            color: var(--rv-fixa-text);
+            border-color: rgba(91, 156, 246, .2);
         }
 
-        .rv:last-child {
-            margin-bottom: 0;
+        .rv-chip:hover {
+            transform: scale(1.02);
         }
 
-        .rv--fixa {
-            background: rgba(91, 156, 246, .12);
-            color: var(--accent);
-            border-left-color: var(--accent);
+        .rv-chip--FIXA {
+            background: var(--rv-fixa-bg);
+            color: var(--rv-fixa-text);
+            border-color: rgba(91, 156, 246, .2);
         }
 
-        .rv--unica {
-            background: rgba(251, 191, 36, .12);
-            color: var(--warning);
-            border-left-color: var(--warning);
+        .rv-chip--UNICA {
+            background: var(--rv-unica-bg);
+            color: var(--rv-unica-text);
+            border-color: rgba(251, 191, 36, .2);
         }
 
-        [data-theme="dark"] .rv--unica {
-            background: rgba(251, 191, 36, .14);
+        .rv-chip--MENSALISTA {
+            background: rgba(139, 92, 246, .08);
+            color: #7c3aed;
+            border-color: rgba(139, 92, 246, .2);
+        }
+
+        [data-theme="dark"] .rv-chip--MENSALISTA {
+            background: rgba(167, 139, 250, .12);
+            color: #c4b5fd;
+            border-color: rgba(167, 139, 250, .2);
+        }
+
+        [data-theme="dark"] .rv-chip--UNICA {
             color: #fde68a;
         }
 
-        [data-theme="dark"] .rv--unica .rv__name {
-            color: #fef3c7;
+        .rv-chip__dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            flex-shrink: 0;
         }
 
-        [data-theme="dark"] .rv--unica .rv__area {
-            color: #fcd34d;
+        .rv-chip--FIXA .rv-chip__dot {
+            background: var(--accent);
         }
 
-        [data-theme="dark"] .rv--fixa .rv__name {
-            color: #dbeafe;
+        .rv-chip--UNICA .rv-chip__dot {
+            background: var(--warning, #f59e0b);
         }
 
-        [data-theme="light"] .rv--fixa {
-            background: rgba(59, 130, 246, .10);
-            color: #1e40af;
+        .rv-chip--MENSALISTA .rv-chip__dot {
+            background: #8b5cf6;
         }
 
-        [data-theme="light"] .rv--fixa .rv__name {
-            color: #1e3a5f;
+        .rv-chip__name {
+            flex: 1;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
-        [data-theme="light"] .rv--unica {
-            background: rgba(245, 158, 11, .10);
-            color: #92400e;
+        .rv-chip__badge {
+            font-size: .58rem;
+            font-weight: 700;
+            opacity: .65;
+            letter-spacing: .3px;
         }
 
-        [data-theme="light"] .rv--unica .rv__name {
-            color: #78350f;
+        .rv-livre {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+            width: 100%;
+            padding: 6px 8px;
+            border-radius: 8px;
+            border: 1px dashed var(--card-border);
+            background: transparent;
+            color: var(--t4, #94a3b8);
+            font-family: inherit;
+            font-size: .72rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all .15s;
         }
 
-        [data-theme="light"] .rv--unica .rv__area {
-            color: #b45309;
+        .rv-livre:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+            background: rgba(91, 156, 246, .04);
         }
 
-        .rv--mensalista {
-            background: rgba(139, 92, 246, .08);
-            border-left: 3px solid #8b5cf6;
+        .rv-multi-slot {
+            background: repeating-linear-gradient(135deg, transparent, transparent 3px, var(--card-border) 3px, var(--card-border) 5px);
+            opacity: .3;
+            height: 3px;
+            border-radius: 2px;
+            margin: 14px 6px;
         }
 
-        [data-theme="dark"] .rv--mensalista {
-            background: rgba(167, 139, 250, .10);
-            border-color: #a78bfa;
+        .rv-loading {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 60px 0;
         }
 
-        [data-theme="dark"] .rv--mensalista .rv__name {
-            color: #c4b5fd;
+        .rv-spinner {
+            width: 28px;
+            height: 28px;
+            border: 3px solid var(--card-border);
+            border-top-color: var(--accent);
+            border-radius: 50%;
+            animation: spin .6s linear infinite;
         }
 
-        [data-theme="dark"] .rv--mensalista .rv__area {
-            color: #a78bfa;
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
         }
 
-        [data-theme="light"] .rv--mensalista {
-            background: rgba(139, 92, 246, .06);
+        .rv-empty {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--t3);
         }
 
-        [data-theme="light"] .rv--mensalista .rv__name {
-            color: #5b21b6;
+        .rv-empty i {
+            font-size: 2rem;
+            opacity: .4;
+            margin-bottom: 10px;
+            display: block;
         }
 
-        [data-theme="light"] .rv--mensalista .rv__area {
-            color: #6d28d9;
+        .rv-legend {
+            display: flex;
+            justify-content: center;
+            gap: 16px;
+            padding: 12px 0;
+            margin-top: 10px;
+        }
+
+        .rv-legend__item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .rv-legend__dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+        }
+
+        .rv-legend__dot--FIXA {
+            background: var(--accent);
+        }
+
+        .rv-legend__dot--UNICA {
+            background: var(--warning, #f59e0b);
+        }
+
+        .rv-legend__dot--MENSALISTA {
+            background: #8b5cf6;
+        }
+
+        .rv-legend__dot--livre {
+            background: var(--bg);
+            border: 1px dashed var(--t4, #94a3b8);
+        }
+
+        .rv-legend__text {
+            font-size: .7rem;
+            font-weight: 600;
+            color: var(--t3);
+            letter-spacing: .3px;
+        }
+
+        .rv-td-today {
+            font-weight: 700 !important;
+            color: var(--accent) !important;
+        }
+
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, .55);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+            padding: 20px;
+            opacity: 0;
+            visibility: hidden;
+            transition: all .2s;
+            backdrop-filter: blur(4px);
+        }
+
+        .modal-overlay.is-open {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal-box {
+            background: var(--card);
+            border: 1px solid var(--card-border);
+            border-radius: 16px;
+            width: 100%;
+            max-width: 480px;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, .2);
+            transform: translateY(20px);
+            transition: transform .2s;
+        }
+
+        .modal-overlay.is-open .modal-box {
+            transform: translateY(0);
+        }
+
+        .modal-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--card-border);
+        }
+
+        .modal-head__title {
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--t1);
+        }
+
+        .modal-head__close {
+            width: 28px;
+            height: 28px;
+            border-radius: 6px;
+            border: none;
+            background: var(--bg);
+            color: var(--t3);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+        }
+
+        .modal-body {
+            padding: 16px 20px;
+        }
+
+        .field {
+            margin-bottom: 12px;
+        }
+
+        .sdb-label {
+            display: block;
+            font-size: .78rem;
+            font-weight: 600;
+            color: var(--t2);
+            margin-bottom: 4px;
+        }
+
+        .req {
+            color: var(--danger, #ef4444);
+        }
+
+        .sdb-input,
+        .sdb-select {
+            width: 100%;
+            padding: 8px 12px;
+            border-radius: 8px;
+            border: 1px solid var(--card-border);
+            background: var(--card);
+            color: var(--t1);
+            font-family: inherit;
+            font-size: .85rem;
+            outline: none;
+            transition: border-color .15s;
+        }
+
+        .sdb-input:focus,
+        .sdb-select:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px var(--input-glow, rgba(91, 156, 246, .12));
+        }
+
+        .modal-info-chips {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-bottom: 14px;
+        }
+
+        .modal-info-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 5px 10px;
+            border-radius: 8px;
+            background: rgba(91, 156, 246, .08);
+            color: var(--accent);
+            font-size: .78rem;
+            font-weight: 600;
+        }
+
+        .field-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .modal-foot {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 20px;
+            border-top: 1px solid var(--card-border);
+        }
+
+        .modal-foot__left {
+            display: flex;
+            gap: 8px;
+        }
+
+        .modal-foot__right {
+            display: flex;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 18px;
+            border-radius: 8px;
+            border: none;
+            background: var(--accent);
+            color: #fff;
+            font-family: inherit;
+            font-size: .82rem;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .btn-ghost {
+            padding: 8px 16px;
+            border-radius: 8px;
+            border: 1px solid var(--card-border);
+            background: transparent;
+            color: var(--t2);
+            font-family: inherit;
+            font-size: .82rem;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .btn-danger {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 16px;
+            border-radius: 8px;
+            border: none;
+            background: var(--danger, #ef4444);
+            color: #fff;
+            font-family: inherit;
+            font-size: .82rem;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .btn-spinner {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid rgba(255, 255, 255, .3);
+            border-top-color: #fff;
+            border-radius: 50%;
+            animation: spin .5s linear infinite;
         }
 
         .cli-search-wrap {
@@ -903,421 +856,71 @@
             padding: 10px 14px;
             cursor: pointer;
             font-size: .84rem;
-            color: var(--t2);
+            color: var(--t1);
             border-bottom: 1px solid var(--card-border);
-            transition: background .1s;
         }
 
         .cli-result-item:hover {
             background: var(--hover);
-            color: var(--t1);
         }
 
         .cli-result-item:last-child {
             border-bottom: none;
         }
 
-        .cli-result-item__tel {
+        .cli-result-item small {
+            display: block;
             font-size: .72rem;
-            color: var(--t4);
-            margin-left: 8px;
+            color: var(--t3);
+            margin-top: 2px;
         }
 
         .cli-selected {
-            display: flex;
+            display: none;
             align-items: center;
             gap: 8px;
             padding: 8px 12px;
-            background: var(--active);
             border-radius: 8px;
-            margin-top: 6px;
-            font-size: .84rem;
+            background: rgba(91, 156, 246, .06);
+            border: 1px solid rgba(91, 156, 246, .15);
+        }
+
+        .cli-selected__nome {
+            flex: 1;
+            font-size: .85rem;
             font-weight: 600;
-            color: var(--accent);
+            color: var(--t1);
         }
 
         .cli-selected__clear {
-            margin-left: auto;
-            background: none;
+            width: 22px;
+            height: 22px;
             border: none;
+            background: transparent;
             color: var(--t3);
             cursor: pointer;
-            font-size: .82rem;
-            display: inline-flex;
-        }
-
-        .rv:hover {
-            opacity: .85;
-            transform: translateY(-1px);
-        }
-
-        .rv__info {
-            flex: 1;
-            min-width: 0;
-            overflow: hidden;
-        }
-
-        .rv__area {
-            font-size: .62rem;
-            font-weight: 700;
-            letter-spacing: .3px;
-            color: var(--accent);
-            opacity: .85;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            max-width: 100%;
-        }
-
-        .rv__name {
-            font-weight: 600;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            max-width: 100%;
-        }
-
-        .rv__date {
-            font-size: .7rem;
-            opacity: .8;
-        }
-
-        .rv__obs {
-            font-size: .68rem;
-            opacity: .7;
-            font-style: italic;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            max-width: 100%;
-        }
-
-        .rv__badge {
-            font-size: .6rem;
-            font-weight: 700;
-            padding: 1px 5px;
             border-radius: 4px;
-            flex-shrink: 0;
-            letter-spacing: .3px;
-        }
-
-        .rv--fixa .rv__badge {
-            background: var(--accent);
-            color: #fff;
-        }
-
-        .rv--unica .rv__badge {
-            background: var(--warning);
-            color: #422006;
-        }
-
-        .cell-add {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            width: 100%;
-            padding: 3px;
-            margin-top: 3px;
-            border: 1.5px dashed var(--card-border);
-            border-radius: 6px;
-            background: transparent;
-            color: var(--t4);
-            font-size: .72rem;
-            cursor: pointer;
-        }
-
-        .cell-add:hover {
-            border-color: var(--accent);
-            color: var(--accent);
-            background: rgba(91, 156, 246, .05);
-        }
-
-        .cell-more {
-            display: block;
-            width: 100%;
-            padding: 3px 6px;
-            margin-top: 2px;
-            font-size: .7rem;
-            font-weight: 600;
-            color: var(--accent);
-            background: rgba(var(--accent-rgb), .08);
-            border: 1px dashed rgba(var(--accent-rgb), .3);
-            border-radius: 6px;
-            cursor: pointer;
-            text-align: center;
-        }
-
-        .cell-more:hover {
-            background: rgba(var(--accent-rgb), .15);
-        }
-
-        .cell-overflow {
-            margin-top: 4px;
-        }
-
-        .empty-state {
-            text-align: center;
-            padding: 60px 20px;
-            color: var(--t4);
-        }
-
-        .empty-state i {
-            font-size: 2.5rem;
-            margin-bottom: 12px;
-            display: block;
-        }
-
-        .empty-state__text {
-            font-size: .9rem;
-        }
-
-        .modal-overlay {
-            position: fixed;
-            inset: 0;
-            background: var(--overlay);
             display: flex;
             align-items: center;
             justify-content: center;
-            z-index: 9000;
-            opacity: 0;
-            visibility: hidden;
-            transition: opacity .25s, visibility .25s;
-            padding: 16px;
         }
 
-        .modal-overlay.is-open {
-            opacity: 1;
-            visibility: visible;
-        }
-
-        .modal-box {
-            background: var(--card);
-            border: 1px solid var(--card-border);
-            border-radius: 18px;
-            width: 100%;
-            max-width: 440px;
-            max-height: 90vh;
-            overflow-y: auto;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, .2);
-            transform: translateY(20px) scale(.97);
-            opacity: 0;
-            transition: transform .3s, opacity .25s;
-        }
-
-        .modal-overlay.is-open .modal-box {
-            transform: translateY(0) scale(1);
-            opacity: 1;
-        }
-
-        .modal-head {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 16px 20px;
-            border-bottom: 1px solid var(--card-border);
-        }
-
-        .modal-head__title {
-            font-weight: 700;
-            font-size: .95rem;
-            color: var(--t1);
-        }
-
-        .modal-head__close {
-            width: 32px;
-            height: 32px;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            border: none;
-            background: var(--hover);
-            border-radius: 8px;
-            color: var(--t3);
-            cursor: pointer;
-            font-size: 1rem;
-        }
-
-        .modal-head__close:hover {
-            background: rgba(248, 113, 113, .1);
-            color: var(--danger);
-        }
-
-        .modal-body {
-            padding: 20px;
-        }
-
-        .modal-foot {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 14px 20px;
-            border-top: 1px solid var(--card-border);
-            gap: 8px;
-        }
-
-        .modal-foot__left {
-            flex-shrink: 0;
-        }
-
-        .modal-foot__right {
-            display: flex;
-            gap: 8px;
-            margin-left: auto;
-        }
-
-        .field {
-            margin-bottom: 14px;
-        }
-
-        .field:last-child {
-            margin-bottom: 0;
-        }
-
-        .field-row {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 12px;
-        }
-
-        .sdb-label {
-            display: block;
-            font-size: .78rem;
-            font-weight: 600;
-            color: var(--t2);
-            margin-bottom: 6px;
-        }
-
-        .req {
-            color: var(--danger);
-        }
-
-        [data-theme="dark"] .req {
-            color: #f87171;
-        }
-
-        [data-theme="light"] .req {
-            color: #dc2626;
-        }
-
-        .modal-body .sdb-input,
-        .modal-body .sdb-select {
-            width: 100%;
-            height: 40px;
-            padding: 0 12px;
-            border: 1.5px solid var(--input-border);
-            border-radius: 10px;
-            background: var(--input-bg);
-            color: var(--t1);
-            font-family: inherit;
-            font-size: .84rem;
-            outline: none;
-        }
-
-        .modal-body textarea.sdb-input {
-            height: 70px;
-            padding: 10px 12px;
-            resize: vertical;
-        }
-
-        .modal-body .sdb-input:focus,
-        .modal-body .sdb-select:focus {
-            border-color: var(--input-focus);
-            box-shadow: 0 0 0 3px var(--input-glow);
-        }
-
-        [data-theme="dark"] .modal-body .sdb-input,
-        [data-theme="dark"] .modal-body .sdb-select {
-            background: rgba(255, 255, 255, .06);
-            border-color: rgba(255, 255, 255, .10);
-            color: #eef2f7;
-        }
-
-        [data-theme="dark"] .modal-body .sdb-input:focus,
-        [data-theme="dark"] .modal-body .sdb-select:focus {
-            border-color: var(--accent);
-            box-shadow: 0 0 0 3px rgba(91, 156, 246, .15);
-        }
-
-        [data-theme="dark"] .modal-body textarea.sdb-input {
-            color: #eef2f7;
-        }
-
-        .btn-primary {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            padding: 8px 18px;
-            border: none;
-            border-radius: 10px;
-            background: var(--accent);
-            color: #fff;
-            font-family: inherit;
-            font-size: .82rem;
-            font-weight: 600;
-            cursor: pointer;
-        }
-
-        .btn-primary:hover {
-            background: var(--accent-h);
-        }
-
-        .btn-primary:disabled {
-            opacity: .6;
-            cursor: not-allowed;
-        }
-
-        .btn-ghost {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            padding: 8px 16px;
-            border: 1px solid var(--card-border);
-            border-radius: 10px;
-            background: transparent;
-            color: var(--t2);
-            font-family: inherit;
-            font-size: .82rem;
-            font-weight: 500;
-            cursor: pointer;
-        }
-
-        .btn-ghost:hover {
-            background: var(--hover);
-        }
-
-        .btn-danger {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            padding: 8px 14px;
-            border: 1px solid rgba(248, 113, 113, .3);
-            border-radius: 10px;
-            background: rgba(248, 113, 113, .08);
-            color: var(--danger);
-            font-family: inherit;
-            font-size: .82rem;
-            font-weight: 600;
-            cursor: pointer;
-        }
-
-        .btn-danger:hover {
-            background: var(--danger);
-            color: #fff;
-            border-color: var(--danger);
+        .cli-selected__clear:hover {
+            color: var(--danger, #ef4444);
         }
 
         .confirm-overlay {
             position: fixed;
             inset: 0;
-            background: var(--overlay);
+            background: rgba(0, 0, 0, .55);
             display: flex;
             align-items: center;
             justify-content: center;
-            z-index: 9100;
+            z-index: 110;
             opacity: 0;
             visibility: hidden;
-            transition: opacity .2s, visibility .2s;
-            padding: 16px;
+            transition: all .2s;
+            backdrop-filter: blur(4px);
         }
 
         .confirm-overlay.is-open {
@@ -1329,39 +932,23 @@
             background: var(--card);
             border: 1px solid var(--card-border);
             border-radius: 16px;
-            padding: 24px;
-            text-align: center;
-            max-width: 360px;
+            padding: 28px;
             width: 100%;
-        }
-
-        [data-theme="dark"] .confirm-box {
-            background: #0f1729;
-            border-color: rgba(255, 255, 255, .08);
+            max-width: 380px;
+            text-align: center;
         }
 
         .confirm-box__icon {
-            width: 48px;
-            height: 48px;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 50%;
-            background: rgba(248, 113, 113, .1);
-            color: var(--danger);
-            font-size: 1.2rem;
-            margin-bottom: 14px;
+            font-size: 1.6rem;
+            color: var(--warning, #f59e0b);
+            margin-bottom: 12px;
         }
 
         .confirm-box__msg {
             font-size: .88rem;
-            color: var(--t2);
+            color: var(--t1);
             margin-bottom: 20px;
             line-height: 1.5;
-        }
-
-        [data-theme="dark"] .confirm-box__msg {
-            color: #b0bdd0;
         }
 
         .confirm-box__actions {
@@ -1370,373 +957,359 @@
             justify-content: center;
         }
 
-        .cal-loading {
-            display: flex;
+        .act-btn {
+            display: inline-flex;
             align-items: center;
             justify-content: center;
-            min-height: 200px;
+            width: 38px;
+            height: 38px;
+            border-radius: 10px;
+            border: 1px solid var(--card-border);
+            background: var(--card);
+            color: var(--t3);
+            text-decoration: none;
+            cursor: pointer;
+            transition: all .15s;
+            font-size: .9rem;
         }
 
-        .cal-spinner {
-            width: 32px;
-            height: 32px;
-            border: 3px solid var(--card-border);
-            border-top-color: var(--accent);
-            border-radius: 50%;
-            animation: calSpin .6s linear infinite;
-        }
-
-        @keyframes calSpin {
-            to {
-                transform: rotate(360deg);
-            }
-        }
-
-        .btn-spinner {
-            display: inline-block;
-            animation: calSpin .55s linear infinite;
-            width: 16px;
-            height: 16px;
-            border: 2px solid rgba(255, 255, 255, .3);
-            border-top-color: #fff;
-            border-radius: 50%;
+        .act-btn:hover {
+            border-color: var(--accent);
+            color: var(--accent);
         }
 
         @media (max-width: 768px) {
-            .toolbar {
-                flex-direction: row;
-                flex-wrap: wrap;
+            .rv-toolbar__row {
                 gap: 8px;
-                padding: 8px 10px;
             }
 
-            .toolbar__sep {
+            .rv-toolbar__sep {
                 display: none;
             }
 
-            .toolbar .sdb-input {
-                flex: 1;
-                max-width: 100%;
-                min-width: 120px;
+            .rv-stats {
+                flex-wrap: wrap;
             }
 
-            .area-filter {
-                width: 100%;
-                order: -1;
+            .rv-stat {
+                min-width: 90px;
             }
 
-            .area-filter__select {
-                flex: 1;
-                min-width: 0;
-                max-width: 100%;
+            .rv-days {
+                gap: 4px;
+                flex-wrap: wrap;
             }
 
-            .filter-chip {
-                padding: 5px 10px;
-                font-size: .74rem;
-            }
-
-            .year-grid {
-                grid-template-columns: repeat(2, 1fr);
+            .rv-day {
+                padding: 6px 10px;
+                min-width: 46px;
             }
 
             .field-row {
                 grid-template-columns: 1fr;
             }
 
-            .period-bar {
-                padding: 8px 10px;
-                gap: 6px;
-                font-size: .78rem;
-            }
-
-            .period-bar__label {
-                font-size: .78rem;
-            }
-
-            .modal-overlay {
-                padding: 12px;
-                align-items: center;
-                justify-content: center;
-            }
-
-            .modal-box {
-                max-width: 100%;
-                max-height: 88vh;
-                border-radius: 16px;
-                transform: translateY(20px) scale(.95);
-            }
-
-            .modal-overlay.is-open .modal-box {
-                transform: translateY(0) scale(1);
-            }
-
-            .modal-body {
-                padding: 16px;
-            }
-
-            .modal-foot {
-                padding: 12px 16px;
-            }
-
-            .day-slot {
-                padding: 8px 12px;
+            .rv-lanes {
                 gap: 8px;
             }
 
-            .day-slot__hora {
-                min-width: 48px;
-                font-size: .8rem;
-            }
-
-            .week-grid {
-                -webkit-overflow-scrolling: touch;
-            }
-
-            .week-grid table {
-                min-width: 600px;
-            }
-
-            .week-grid th {
-                padding: 8px 4px;
-                font-size: .68rem;
-                letter-spacing: .2px;
-            }
-
-            .week-grid th small {
-                font-size: .6rem;
-            }
-
-            .week-grid th:first-child,
-            .week-grid .td-hora {
-                width: 56px;
-                min-width: 56px;
-                max-width: 56px;
-                font-size: .72rem;
-            }
-
-            .week-grid td {
-                padding: 3px 4px;
-            }
-
-            .rv {
-                padding: 3px 5px;
-                font-size: .7rem;
-                gap: 4px;
-                border-left-width: 2px;
-            }
-
-            .rv__name {
-                font-size: .7rem;
-            }
-
-            .rv__area {
-                font-size: .56rem;
-            }
-
-            .rv__date {
-                font-size: .6rem;
-            }
-
-            .rv__obs {
-                font-size: .58rem;
-            }
-
-            .rv__badge {
-                font-size: .52rem;
-                padding: 1px 4px;
-            }
-
-            .cell-add {
-                font-size: .64rem;
-                padding: 2px;
-                margin-top: 2px;
+            .rv-lane {
+                min-width: 160px;
             }
         }
 
         @media (max-width: 480px) {
-            .year-grid {
-                grid-template-columns: 1fr;
+            .rv-toolbar {
+                padding: 10px 12px;
             }
 
-            .area-filter__select {
-                min-width: 120px;
-                font-size: .78rem;
-            }
-
-            .view-modes {
-                width: 100%;
-            }
-
-            .view-mode {
-                flex: 1;
-                text-align: center;
-                padding: 6px 8px;
-                font-size: .74rem;
-            }
-
-            .filter-chip {
-                padding: 5px 8px;
-                font-size: .72rem;
-                gap: 3px;
-            }
-
-            .filter-chip i {
-                font-size: .7rem;
-            }
-
-            .rv {
-                padding: 2px 4px;
-                font-size: .64rem;
-                gap: 3px;
-                border-radius: 5px;
-            }
-
-            .rv__name {
-                font-size: .64rem;
-            }
-
-            .rv__area {
-                font-size: .52rem;
-            }
-
-            .rv__badge {
-                font-size: .48rem;
-                padding: 1px 3px;
-                border-radius: 3px;
-            }
-
-            .rv__obs {
-                display: none;
-            }
-
-            .rv__date {
-                font-size: .56rem;
-            }
-
-            .cell-add {
-                font-size: .58rem;
-                padding: 1px;
-            }
-
-            .cell-more {
-                font-size: .6rem;
-                padding: 2px 4px;
-            }
-
-            .period-bar__divider {
-                display: none;
-            }
-
-            .period-bar__label {
-                font-size: .74rem;
-            }
-
-            .period-bar__count {
-                font-size: .7rem;
-            }
-
-            .month-grid td {
-                padding: 4px;
-                min-height: 60px;
-                height: 60px;
-            }
-
-            .month-day {
-                font-size: .72rem;
-            }
-
-            .month-count {
-                font-size: .62rem;
-                padding: 1px 4px;
-            }
-
-            .modal-overlay {
-                padding: 8px;
-            }
-
-            .modal-box {
-                max-height: 90vh;
-            }
-
-            .modal-head {
-                padding: 12px 14px;
-            }
-
-            .modal-head__title {
+            .rv-day__num {
                 font-size: .88rem;
             }
 
-            .modal-body {
-                padding: 12px 14px;
+            .rv-day__abbr {
+                font-size: .6rem;
             }
 
-            .modal-body .sdb-input,
-            .modal-body .sdb-select {
-                height: 38px;
-                font-size: .8rem;
+            .rv-chip {
+                font-size: .7rem;
+                padding: 4px 6px;
             }
 
-            .sdb-label {
-                font-size: .74rem;
-                margin-bottom: 4px;
+            .modal-box {
+                max-width: 100%;
             }
 
-            .field {
-                margin-bottom: 10px;
+            .rv-lane {
+                min-width: 150px;
             }
 
-            .modal-foot {
-                padding: 10px 14px;
-            }
-
-            .btn-primary,
-            .btn-ghost,
-            .btn-danger {
-                font-size: .78rem;
-                padding: 7px 12px;
+            .rv-tipo-chips {
+                flex-wrap: wrap;
             }
         }
 
-        @supports (padding: env(safe-area-inset-bottom)) {
-            @media (max-width: 480px) {
-                .modal-foot {
-                    padding-bottom: max(10px, env(safe-area-inset-bottom));
-                }
+        .rv-view-toggle {
+            display: inline-flex;
+            gap: 2px;
+            background: var(--bg);
+            border-radius: 8px;
+            padding: 2px;
+        }
+
+        .rv-view-btn {
+            padding: 5px 14px;
+            border: none;
+            border-radius: 6px;
+            background: transparent;
+            color: var(--t3);
+            font-family: inherit;
+            font-size: .8rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all .15s;
+        }
+
+        .rv-view-btn.active {
+            background: var(--card);
+            color: var(--t1);
+            font-weight: 600;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, .06);
+        }
+
+        [data-theme="dark"] .rv-view-btn.active {
+            background: var(--accent);
+            color: #fff;
+        }
+
+        .rv-slot--selected {
+            background: rgba(91, 156, 246, .08) !important;
+        }
+
+        .rv-slot--selected .rv-slot__time {
+            color: var(--accent) !important;
+        }
+
+        .rv-livre--selected {
+            border: 1px solid var(--accent) !important;
+            background: rgba(91, 156, 246, .06) !important;
+            color: var(--accent) !important;
+            font-weight: 600 !important;
+        }
+
+        .rv-sel-bar {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--card);
+            border: 1px solid var(--card-border);
+            border-radius: 14px;
+            padding: 12px 20px;
+            display: none;
+            align-items: center;
+            gap: 14px;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, .2);
+            z-index: 50;
+            max-width: 600px;
+            width: calc(100% - 40px);
+        }
+
+        .rv-sel-bar.is-open {
+            display: flex;
+        }
+
+        [data-theme="dark"] .rv-sel-bar {
+            background: #0f172a;
+            border-color: rgba(255, 255, 255, .1);
+        }
+
+        .rv-sel-bar__info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .rv-sel-bar__title {
+            font-size: .82rem;
+            font-weight: 700;
+            color: var(--t1);
+        }
+
+        .rv-sel-bar__detail {
+            font-size: .74rem;
+            color: var(--t3);
+            margin-top: 2px;
+        }
+
+        .rv-sel-bar__btn-clear {
+            padding: 6px 14px;
+            border-radius: 8px;
+            border: 1px solid var(--card-border);
+            background: transparent;
+            color: var(--t2);
+            font-family: inherit;
+            font-size: .78rem;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .rv-sel-bar__btn-go {
+            padding: 8px 18px;
+            border-radius: 8px;
+            border: none;
+            background: var(--accent);
+            color: #fff;
+            font-family: inherit;
+            font-size: .82rem;
+            font-weight: 700;
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(91, 156, 246, .3);
+        }
+
+        .rv-month {
+            max-width: 700px;
+            margin: 0 auto;
+            background: var(--card);
+            border-radius: 14px;
+            border: 1px solid var(--card-border);
+            overflow: hidden;
+        }
+
+        .rv-month__grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+        }
+
+        .rv-month__hdr {
+            padding: 10px 4px;
+            text-align: center;
+            font-size: .72rem;
+            font-weight: 700;
+            color: var(--t3);
+            text-transform: uppercase;
+            letter-spacing: .5px;
+            background: var(--bg);
+            border-bottom: 2px solid var(--card-border);
+        }
+
+        .rv-month__cell {
+            padding: 8px 6px;
+            min-height: 72px;
+            border-bottom: 1px solid var(--card-border);
+            border-right: 1px solid var(--card-border);
+            cursor: pointer;
+            transition: background .15s;
+        }
+
+        .rv-month__cell:nth-child(7n) {
+            border-right: none;
+        }
+
+        .rv-month__cell:hover {
+            background: var(--hover);
+        }
+
+        .rv-month__cell--empty {
+            background: var(--bg);
+            cursor: default;
+        }
+
+        .rv-month__cell--empty:hover {
+            background: var(--bg);
+        }
+
+        .rv-month__day {
+            font-weight: 600;
+            font-size: .8rem;
+            color: var(--t1);
+            margin-bottom: 4px;
+        }
+
+        .rv-month__day--today {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: var(--accent);
+            color: #fff;
+        }
+
+        .rv-month__badge {
+            font-size: .62rem;
+            padding: 1px 5px;
+            border-radius: 3px;
+            font-weight: 600;
+            display: inline-block;
+        }
+
+        .rv-month__badge--fixas {
+            background: rgba(91, 156, 246, .1);
+            color: var(--accent);
+        }
+
+        .rv-month__badge--unicas {
+            background: rgba(251, 191, 36, .1);
+            color: var(--warning, #f59e0b);
+        }
+
+        .rv-month__badge--mensalistas {
+            background: rgba(139, 92, 246, .1);
+            color: #8b5cf6;
+        }
+
+        .rv-days {
+            flex-wrap: wrap;
+        }
+
+        @media (max-width: 768px) {
+            .rv-sel-bar {
+                bottom: 10px;
+                padding: 10px 14px;
+                gap: 10px;
+                flex-wrap: wrap;
+            }
+
+            .rv-sel-bar__title {
+                font-size: .78rem;
+            }
+
+            .rv-month__cell {
+                min-height: 56px;
+                padding: 6px 4px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .rv-sel-bar {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .rv-sel-bar__btn-go {
+                width: 100%;
+                justify-content: center;
             }
         }
 
         @media print {
-            * {
-                -webkit-print-color-adjust: exact !important;
-                print-color-adjust: exact !important;
-            }
-
-            body {
-                background: #fff !important;
-                color: #000 !important;
-                font-size: 9px !important;
-            }
 
             .topnav,
             .bottomnav,
-            .area-filter,
-            .toolbar,
-            .period-bar,
-            .cal-loading,
-            .cell-add,
-            .cell-more,
+            .rv-toolbar,
+            .rv-days,
+            .rv-stats,
+            .rv-legend,
             .act-btn,
             .modal-overlay,
             .confirm-overlay,
+            .rv-livre,
             .page-header__sub,
-            #btnExportPdf,
-            #btnExportXlsx {
+            .rv-lane__foot,
+            .rv-sel-bar,
+            .rv-view-toggle {
                 display: none !important;
-            }
-
-            .cell-overflow {
-                display: block !important;
             }
 
             .page {
@@ -1748,164 +1321,100 @@
                 margin-bottom: 8px !important;
             }
 
-            .page-header__title {
-                font-size: 14px !important;
-                color: #000 !important;
-            }
-
-            .page-content {
-                padding: 0 !important;
-            }
-
-            .week-grid {
+            .rv-lane {
                 border: 1px solid #999 !important;
                 border-radius: 0 !important;
                 overflow: visible !important;
             }
 
-            .week-grid table {
+            .rv-chip {
+                font-size: 7px !important;
+                padding: 2px 4px !important;
+            }
+
+            .rv-lanes {
+                overflow: visible !important;
+                flex-wrap: wrap !important;
+            }
+
+            .rv-lane {
+                max-width: none !important;
                 min-width: 0 !important;
             }
 
-            .week-grid th {
-                background: #e5e7eb !important;
-                color: #000 !important;
-                font-size: 8px !important;
-                padding: 4px 3px !important;
-                position: static !important;
-            }
-
-            .week-grid td {
-                font-size: 7px !important;
-                padding: 2px 3px !important;
-                background: #fff !important;
-            }
-
-            .week-grid .td-hora {
-                position: static !important;
-                background: #f3f4f6 !important;
-                color: #000 !important;
-                font-size: 8px !important;
-                border-right-width: 1px !important;
-            }
-
-            .rv {
-                padding: 2px 3px !important;
-                border-radius: 2px !important;
-                font-size: 7px !important;
-                margin-bottom: 2px !important;
-                gap: 3px !important;
-                page-break-inside: avoid;
-            }
-
-            .rv--fixa {
-                background: #dbeafe !important;
-                color: #000 !important;
-                border-left: 2px solid #3b82f6 !important;
-            }
-
-            .rv--unica {
-                background: #fef3c7 !important;
-                color: #000 !important;
-                border-left: 2px solid #f59e0b !important;
-            }
-
-            .rv__badge {
-                font-size: 6px !important;
-                padding: 1px 3px !important;
-            }
-
-            .rv__name {
-                font-size: 7px !important;
-            }
-
-            .rv__obs,
-            .rv__date,
-            .rv__area {
-                font-size: 6px !important;
-            }
-
-            .day-grid {
-                border-radius: 0 !important;
-            }
-
-            .day-slot {
-                padding: 4px 8px !important;
-            }
-
-            .month-grid {
-                border-radius: 0 !important;
+            .rv-lane__body {
+                max-height: none !important;
                 overflow: visible !important;
-            }
-
-            .month-grid th {
-                background: #e5e7eb !important;
-                color: #000 !important;
-                position: static !important;
-            }
-
-            .month-grid td {
-                background: #fff !important;
-            }
-
-            .year-grid {
-                grid-template-columns: repeat(4, 1fr) !important;
-            }
-
-            .year-month {
-                border-radius: 0 !important;
-                page-break-inside: avoid;
             }
         }
     </style>
 @endsection
 
 @section('content')
-    <div class="toolbar">
-        <div class="area-filter">
-            <label class="area-filter__label" for="filtroArea"><i class="fi fi-rr-marker"></i></label>
-            <select class="area-filter__select" id="filtroArea" onchange="selecionarArea(this.value)">
-                <option value="">Todas as Áreas</option>
-                @foreach ($areasPorTipo as $grupo)
-                    <optgroup label="{{ $grupo['tipo']->nome }}">
-                        @foreach ($grupo['areas'] as $a)
-                            <option value="{{ $a->id }}"
-                                {{ $areaAtiva && $areaAtiva->id === $a->id ? 'selected' : '' }}>
-                                {{ $a->nome }}
-                            </option>
-                        @endforeach
-                    </optgroup>
-                @endforeach
-            </select>
-        </div>
-        <div class="toolbar__sep"></div>
-        <div class="view-modes">
-            <button type="button" class="view-mode active" data-view="week"
-                onclick="trocarView('week')">Semana</button>
-            <button type="button" class="view-mode" data-view="day" onclick="trocarView('day')">Dia</button>
-            <button type="button" class="view-mode" data-view="month" onclick="trocarView('month')">Mês</button>
-            <button type="button" class="view-mode" data-view="year" onclick="trocarView('year')">Ano</button>
-        </div>
-        <div class="toolbar__sep"></div>
-        <button type="button" class="filter-chip active" id="chipTodos" onclick="filtrarTipo(null)"><i
-                class="fi fi-rr-list"></i> Todos</button>
-        <button type="button" class="filter-chip" id="chipFixa" onclick="filtrarTipo('FIXA')"><i
-                class="fi fi-rr-refresh"></i> Fixas</button>
-        <button type="button" class="filter-chip" id="chipUnica" onclick="filtrarTipo('UNICA')"><i
-                class="fi fi-rr-calendar-day"></i> Únicas</button>
-        <button type="button" class="filter-chip" id="chipMensalista" onclick="filtrarTipo('MENSALISTA')"><i
-                class="fi fi-rr-user"></i> Mensalistas</button>
-        <div class="toolbar__sep"></div>
-        <input type="text" class="sdb-input" id="filtroCliente" placeholder="Buscar cliente ou obs..."
-            oninput="debounceBusca()">
+    <div id="rvLoading" class="rv-loading" style="display:none;">
+        <div class="rv-spinner"></div>
     </div>
 
-    <div class="period-bar" id="periodBar" style="display:none;"></div>
+    <div id="rvPanel">
+        <div class="rv-toolbar">
+            <div class="rv-toolbar__row">
+                <div class="rv-tabs" id="rvTabs"></div>
+                <div class="rv-toolbar__sep"></div>
+                <div class="rv-view-toggle">
+                    <button type="button" class="rv-view-btn active" data-view="semana"
+                        onclick="trocarView('semana')">Semana</button>
+                    <button type="button" class="rv-view-btn" data-view="mes" onclick="trocarView('mes')">Mês</button>
+                </div>
+                <div class="rv-toolbar__sep"></div>
+                <button type="button" class="rv-nav-btn" onclick="navPeriodo(-1)"><i
+                        class="fi fi-rr-angle-left"></i></button>
+                <span class="rv-week-label" id="rvWeekLabel"></span>
+                <button type="button" class="rv-nav-btn" onclick="navPeriodo(1)"><i
+                        class="fi fi-rr-angle-right"></i></button>
+                <button type="button" class="rv-today-btn" id="rvTodayBtn" style="display:none"
+                    onclick="irParaHoje()">Hoje</button>
+            </div>
+            <div class="rv-toolbar__row">
+                <div class="rv-tipo-chips">
+                    <button type="button" class="rv-tipo-chip active" data-tipo="" onclick="filtrarTipo(this)"><i
+                            class="fi fi-rr-list"></i> Todos</button>
+                    <button type="button" class="rv-tipo-chip" data-tipo="FIXA" onclick="filtrarTipo(this)"><i
+                            class="fi fi-rr-refresh"></i> Fixas</button>
+                    <button type="button" class="rv-tipo-chip" data-tipo="UNICA" onclick="filtrarTipo(this)"><i
+                            class="fi fi-rr-calendar-day"></i> Únicas</button>
+                    <button type="button" class="rv-tipo-chip" data-tipo="MENSALISTA" onclick="filtrarTipo(this)"><i
+                            class="fi fi-rr-user"></i> Mensalistas</button>
+                </div>
+                <input type="text" class="rv-search" id="rvBusca"
+                    placeholder="Buscar por nome do cliente ou observação..." oninput="debounceBusca()">
+            </div>
+        </div>
 
-    <div class="cal-loading" id="calLoading">
-        <div class="cal-spinner"></div>
+        <div id="rvDaySelector" class="rv-days"></div>
+        <div id="rvStats" class="rv-stats"></div>
+        <div id="rvGridContainer"></div>
+
+        <div class="rv-legend">
+            <div class="rv-legend__item"><span class="rv-legend__dot rv-legend__dot--FIXA"></span><span
+                    class="rv-legend__text">FIXA</span></div>
+            <div class="rv-legend__item"><span class="rv-legend__dot rv-legend__dot--UNICA"></span><span
+                    class="rv-legend__text">ÚNICA</span></div>
+            <div class="rv-legend__item"><span class="rv-legend__dot rv-legend__dot--MENSALISTA"></span><span
+                    class="rv-legend__text">MENSALISTA</span></div>
+            <div class="rv-legend__item"><span class="rv-legend__dot rv-legend__dot--livre"></span><span
+                    class="rv-legend__text">LIVRE</span></div>
+        </div>
     </div>
-    <div id="calContainer"></div>
+
+    <div class="rv-sel-bar" id="rvSelBar">
+        <div class="rv-sel-bar__info">
+            <div class="rv-sel-bar__title" id="rvSelTitle"></div>
+            <div class="rv-sel-bar__detail" id="rvSelDetail"></div>
+        </div>
+        <button type="button" class="rv-sel-bar__btn-clear" onclick="limparSelecao()">Limpar</button>
+        <button type="button" class="rv-sel-bar__btn-go" onclick="confirmarSelecao()"><i class="fi fi-rr-check"></i>
+            Reservar</button>
+    </div>
 
     <div class="modal-overlay" id="modalReserva" onclick="if(event.target===this)fecharModal()">
         <div class="modal-box">
@@ -1918,6 +1427,16 @@
                 <input type="hidden" id="reserva-id">
                 <input type="hidden" id="reserva-dia">
                 <input type="hidden" id="reserva-horario">
+
+                <div id="modalInfoChips" class="modal-info-chips"></div>
+
+                <div id="modalMultiSlotWarning" class="field" style="display:none">
+                    <div
+                        style="padding:10px 14px;border-radius:10px;background:rgba(251,191,36,.08);border:1px solid rgba(251,191,36,.2);font-size:.78rem;color:var(--warning,#d97706)">
+                        <strong>Atenção:</strong> <span id="modalMultiSlotMsg"></span>
+                    </div>
+                </div>
+
                 <div class="field" id="fieldArea" style="display:none">
                     <label class="sdb-label">Área <span class="req">*</span></label>
                     <select id="reserva-area" class="sdb-select">
@@ -1931,48 +1450,54 @@
                         @endforeach
                     </select>
                 </div>
+
                 <div class="field">
                     <label class="sdb-label">Cliente <span class="req">*</span></label>
                     <input type="hidden" id="reserva-cliente-id">
                     <div class="cli-search-wrap">
                         <input type="text" id="reserva-cliente-busca" class="sdb-input"
-                            placeholder="Buscar cliente por nome..." autocomplete="off" oninput="buscarCliente()">
+                            placeholder="Buscar cliente por nome ou telefone..." oninput="buscarCliente()">
                         <div class="cli-results" id="cliResults"></div>
                     </div>
-                    <div class="cli-selected" id="cliSelected" style="display:none">
-                        <span id="cliSelectedNome"></span>
+                    <div class="cli-selected" id="cliSelected">
+                        <span class="cli-selected__nome" id="cliSelectedNome"></span>
                         <button type="button" class="cli-selected__clear" onclick="limparCliente()"><i
                                 class="fi fi-rr-cross-small"></i></button>
                     </div>
                 </div>
-                <div class="field">
-                    <label class="sdb-label">Tipo <span class="req">*</span></label>
-                    <select id="reserva-tipo" class="sdb-select" onchange="onTipoChange()">
-                        <option value="UNICA">Única</option>
-                        <option value="FIXA">Fixa</option>
-                        <option value="MENSALISTA">Mensalista</option>
-                    </select>
-                </div>
-                <div class="field" id="fieldDataReserva">
-                    <label class="sdb-label">Data da Reserva</label>
-                    <input type="date" id="reserva-data" class="sdb-input">
-                </div>
-                <div class="field" id="fieldPeriodoFixa" style="display:none">
-                    <label class="sdb-label">Período da Reserva Fixa</label>
-                    <div class="field-row">
-                        <div>
-                            <label class="sdb-label">Início</label>
-                            <input type="date" id="reserva-data-inicio" class="sdb-input">
-                        </div>
-                        <div>
-                            <label class="sdb-label">Fim (opcional)</label>
-                            <input type="date" id="reserva-data-fim" class="sdb-input">
-                        </div>
+
+                <div class="field-row">
+                    <div class="field">
+                        <label class="sdb-label">Tipo <span class="req">*</span></label>
+                        <select id="reserva-tipo" class="sdb-select" onchange="onTipoChange()">
+                            <option value="UNICA">Única</option>
+                            <option value="FIXA">Fixa</option>
+                            <option value="MENSALISTA">Mensalista</option>
+                        </select>
+                    </div>
+                    <div class="field" id="fieldDuracao" style="display:none">
+                        <label class="sdb-label">Duração real (min)</label>
+                        <input type="number" id="reserva-duracao-min" class="sdb-input" placeholder="Ex: 90">
                     </div>
                 </div>
+
+                <div class="field" id="fieldDataReserva" style="display:none">
+                    <label class="sdb-label">Data da Reserva <span class="req">*</span></label>
+                    <input type="date" id="reserva-data" class="sdb-input">
+                </div>
+
+                <div class="field" id="fieldPeriodoFixa" style="display:none">
+                    <label class="sdb-label">Período de Vigência</label>
+                    <div class="field-row">
+                        <input type="date" id="reserva-data-inicio" class="sdb-input" placeholder="Início">
+                        <input type="date" id="reserva-data-fim" class="sdb-input" placeholder="Fim">
+                    </div>
+                </div>
+
                 <div class="field">
                     <label class="sdb-label">Observações</label>
-                    <textarea id="reserva-obs" class="sdb-input" placeholder="Anotações opcionais..."></textarea>
+                    <textarea id="reserva-obs" class="sdb-input" style="min-height:60px;resize:vertical"
+                        placeholder="Anotações opcionais..."></textarea>
                 </div>
             </div>
             <div class="modal-foot">
@@ -2008,279 +1533,176 @@
         (function() {
             'use strict';
 
-            var state = {
-                areaId: {{ $areaAtiva->id ?? 'null' }},
-                area: {{ Js::from($areaJson) }},
-                reservas: {{ Js::from($reservasIniciais) }},
-                todasAreas: {{ Js::from($todasAreasJson) }},
-                horariosUnificados: {{ Js::from($horariosUnificadosJson) }},
-                view: 'week',
-                filtroTipo: null,
-                filtroCliente: '',
-                diaAtual: 0,
-                mesAtual: new Date().getMonth(),
-                anoAtual: new Date().getFullYear(),
-                semanaOffset: 0,
-                dataRefDia: null,
-                loading: false
-            };
-
-            var reservaMap = {};
-            var reservaIndex = {};
-            var reservaByDate = {};
-            var canCriar = {{ auth()->user()->can('reservas.criar') ? 'true' : 'false' }};
-            var canEditar = {{ auth()->user()->can('reservas.editar') ? 'true' : 'false' }};
-            var canExcluir = {{ auth()->user()->can('reservas.excluir') ? 'true' : 'false' }};
-            var confirmCallback = null;
-            var debounceTimer = null;
-            var currentAbort = null;
-            var _escDiv = document.createElement('div');
-            var MAX_CHIPS_CELL = 3;
-
+            var CSRF = '{{ csrf_token() }}';
             var ROUTE_STORE = '{{ route('reservas.store') }}';
             var ROUTE_UPDATE = '{{ route('reservas.update', '__ID__') }}';
             var ROUTE_DESTROY = '{{ route('reservas.destroy', '__ID__') }}';
             var ROUTE_DATA = '{{ route('reservas.data') }}';
+            var ROUTE_BUSCAR_CLIENTE = '{{ route('clientes.buscar') }}';
             var ROUTE_EXPORT_PDF = '{{ route('reservas.exportar.pdf.filtrado') }}';
             var ROUTE_EXPORT_XLSX = '{{ route('reservas.exportar.xlsx.filtrado') }}';
 
-            var $pageTitle = document.getElementById('pageTitle');
-            var $pageSub = document.getElementById('pageSub');
-            var $calContainer = document.getElementById('calContainer');
-            var $periodBar = document.getElementById('periodBar');
-            var $loadingEl = document.getElementById('calLoading');
-            var $btnPdf = document.getElementById('btnExportPdf');
-            var $btnXlsx = document.getElementById('btnExportXlsx');
-            var $filtroCliente = document.getElementById('filtroCliente');
+            var canCriar = {{ auth()->user()->can('reservas.criar') ? 'true' : 'false' }};
+            var canEditar = {{ auth()->user()->can('reservas.editar') ? 'true' : 'false' }};
 
-            var $modalOverlay = document.getElementById('modalReserva');
-            var $modalTitulo = document.getElementById('modalTitulo');
-            var $rId = document.getElementById('reserva-id');
-            var $rDia = document.getElementById('reserva-dia');
-            var $rHorario = document.getElementById('reserva-horario');
-            var $rClienteId = document.getElementById('reserva-cliente-id');
-            var $rClienteBusca = document.getElementById('reserva-cliente-busca');
-            var $cliResults = document.getElementById('cliResults');
-            var $cliSelected = document.getElementById('cliSelected');
-            var $cliSelectedNome = document.getElementById('cliSelectedNome');
-            var $rTipo = document.getElementById('reserva-tipo');
-            var $rData = document.getElementById('reserva-data');
-            var $rDataInicio = document.getElementById('reserva-data-inicio');
-            var $rDataFim = document.getElementById('reserva-data-fim');
-            var $rObs = document.getElementById('reserva-obs');
-            var $fieldData = document.getElementById('fieldDataReserva');
-            var $fieldFixa = document.getElementById('fieldPeriodoFixa');
-            var $fieldArea = document.getElementById('fieldArea');
-            var $rArea = document.getElementById('reserva-area');
-            var $btnExcluir = document.getElementById('btnExcluir');
-            var $btnSalvar = document.getElementById('btnSalvar');
-            var $confirmOverlay = document.getElementById('confirmOverlay');
-            var $confirmMsg = document.getElementById('confirmMsg');
-            var $viewModes = document.querySelectorAll('.view-mode');
-            var $chipTodos = document.getElementById('chipTodos');
-            var $chipFixa = document.getElementById('chipFixa');
-            var $chipUnica = document.getElementById('chipUnica');
-            var $chipMensalista = document.getElementById('chipMensalista');
-            var ROUTE_BUSCAR_CLIENTE = '{{ route('clientes.buscar') }}';
-            var cliSearchTimer = null;
+            var todasAreas = {{ Js::from($todasAreasJson ?? []) }};
+            var areasPorTipo =
+                {{ Js::from(
+                    $areasPorTipo->map(
+                            fn($g) => [
+                                'tipo_id' => $g['tipo']->id,
+                                'tipo_nome' => $g['tipo']->nome,
+                                'tipo_icone' => $g['tipo']->icone,
+                                'tipo_cor' => $g['tipo']->cor,
+                                'areas' => $g['areas']->map(
+                                        fn($a) => [
+                                            'id' => $a->id,
+                                            'nome' => $a->nome,
+                                            'descricao' => $a->descricao,
+                                            'modo_reserva' => $a->modo_reserva,
+                                            'tipo_area_id' => $a->tipo_area_id,
+                                        ],
+                                    )->values(),
+                            ],
+                        )->values(),
+                ) }};
+            var areaIdInicial = {{ $areaIdInicial ?? 'null' }};
 
-            var DIAS_PT = {
-                DOMINGO: 'Domingo',
-                SEGUNDA: 'Segunda',
-                TERCA: 'Terça',
-                QUARTA: 'Quarta',
-                QUINTA: 'Quinta',
-                SEXTA: 'Sexta',
-                SABADO: 'Sábado'
-            };
-            var DIAS_SEMANA_ISO = ['SEGUNDA', 'TERCA', 'QUARTA', 'QUINTA', 'SEXTA', 'SABADO', 'DOMINGO'];
-            var MESES_PT = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro',
+            var DIAS = [{
+                    key: 'SEGUNDA',
+                    label: 'Segunda',
+                    abbr: 'SEG'
+                },
+                {
+                    key: 'TERCA',
+                    label: 'Terça',
+                    abbr: 'TER'
+                },
+                {
+                    key: 'QUARTA',
+                    label: 'Quarta',
+                    abbr: 'QUA'
+                },
+                {
+                    key: 'QUINTA',
+                    label: 'Quinta',
+                    abbr: 'QUI'
+                },
+                {
+                    key: 'SEXTA',
+                    label: 'Sexta',
+                    abbr: 'SEX'
+                },
+                {
+                    key: 'SABADO',
+                    label: 'Sábado',
+                    abbr: 'SÁB'
+                },
+                {
+                    key: 'DOMINGO',
+                    label: 'Domingo',
+                    abbr: 'DOM'
+                }
+            ];
+            var DIAS_KEY = ['SEGUNDA', 'TERCA', 'QUARTA', 'QUINTA', 'SEXTA', 'SABADO', 'DOMINGO'];
+            var MESES = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro',
                 'Outubro', 'Novembro', 'Dezembro'
             ];
 
-            function getGridDias() {
-                return state.area ? state.area.dias : DIAS_SEMANA_ISO;
+            function resolverTipoIdxInicial() {
+                if (!areaIdInicial || !areasPorTipo.length) return 0;
+                for (var i = 0; i < areasPorTipo.length; i++) {
+                    for (var j = 0; j < areasPorTipo[i].areas.length; j++) {
+                        if (areasPorTipo[i].areas[j].id === areaIdInicial) return i;
+                    }
+                }
+                return 0;
             }
 
-            function getGridHorarios() {
-                return state.area ? state.area.horarios : state.horariosUnificados;
+            var state = {
+                tipoIdx: resolverTipoIdxInicial(),
+                diaSel: DIAS_KEY[(new Date().getDay() + 6) % 7],
+                semanaOffset: 0,
+                viewMode: 'semana',
+                mesAtual: new Date().getMonth(),
+                anoAtual: new Date().getFullYear(),
+                filtroTipo: '',
+                filtroBusca: '',
+                reservas: {{ Js::from($reservasIniciais) }},
+                loading: false,
+                _filtered: null,
+                sel: null
+            };
+
+            var reservaMap = {};
+            var debounceTimer = null;
+            var cliSearchTimer = null;
+            var currentAbort = null;
+            var confirmCallback = null;
+            var _escDiv = document.createElement('div');
+            var _modalBodyHtml = null;
+
+            var $loading = document.getElementById('rvLoading');
+            var $tabs = document.getElementById('rvTabs');
+            var $weekLabel = document.getElementById('rvWeekLabel');
+            var $todayBtn = document.getElementById('rvTodayBtn');
+            var $daySelector = document.getElementById('rvDaySelector');
+            var $stats = document.getElementById('rvStats');
+            var $gridContainer = document.getElementById('rvGridContainer');
+            var $busca = document.getElementById('rvBusca');
+            var $btnPdf = document.getElementById('btnExportPdf');
+            var $btnXlsx = document.getElementById('btnExportXlsx');
+            var $selBar = document.getElementById('rvSelBar');
+            var $selTitle = document.getElementById('rvSelTitle');
+            var $selDetail = document.getElementById('rvSelDetail');
+
+            var $modalOverlay = document.getElementById('modalReserva');
+            var $modalTitulo = document.getElementById('modalTitulo');
+            var $modalInfoChips = document.getElementById('modalInfoChips');
+            var $confirmOverlay = document.getElementById('confirmOverlay');
+            var $btnExcluir = document.getElementById('btnExcluir');
+            var $btnSalvar = document.getElementById('btnSalvar');
+
+            function $el(id) {
+                return document.getElementById(id);
             }
 
-            function hojeKey() {
-                return DIAS_SEMANA_ISO[(new Date().getDay() + 6) % 7];
+            function rebindModalEls() {
+                return {
+                    rId: $el('reserva-id'),
+                    rDia: $el('reserva-dia'),
+                    rHorario: $el('reserva-horario'),
+                    rClienteId: $el('reserva-cliente-id'),
+                    rClienteBusca: $el('reserva-cliente-busca'),
+                    cliResults: $el('cliResults'),
+                    cliSelected: $el('cliSelected'),
+                    cliSelectedNome: $el('cliSelectedNome'),
+                    rTipo: $el('reserva-tipo'),
+                    rData: $el('reserva-data'),
+                    rDataInicio: $el('reserva-data-inicio'),
+                    rDataFim: $el('reserva-data-fim'),
+                    rObs: $el('reserva-obs'),
+                    fieldData: $el('fieldDataReserva'),
+                    fieldFixa: $el('fieldPeriodoFixa'),
+                    fieldArea: $el('fieldArea'),
+                    fieldDuracao: $el('fieldDuracao'),
+                    rArea: $el('reserva-area'),
+                    rDuracaoMin: $el('reserva-duracao-min'),
+                    multiWarn: $el('modalMultiSlotWarning'),
+                    multiMsg: $el('modalMultiSlotMsg')
+                };
+            }
+            var m = rebindModalEls();
+
+            function escHtml(s) {
+                if (!s) return '';
+                _escDiv.textContent = s;
+                return _escDiv.innerHTML;
             }
 
             function fmtIso(d) {
                 return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate())
                     .padStart(2, '0');
-            }
-
-            function fmtLong(d) {
-                return d.getDate() + ' de ' + MESES_PT[d.getMonth()] + ' de ' + d.getFullYear();
-            }
-
-            function sameDate(a, b) {
-                return a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b
-                    .getDate();
-            }
-
-            function escHtml(str) {
-                if (!str) return '';
-                _escDiv.textContent = str;
-                return _escDiv.innerHTML;
-            }
-
-            function indexReservas() {
-                reservaMap = {};
-                reservaIndex = {};
-                reservaByDate = {};
-                if (!state.reservas) return;
-                for (var i = 0; i < state.reservas.length; i++) {
-                    var r = state.reservas[i];
-                    reservaMap[r.id] = r;
-                    var key = r.dia_semana + '|' + r.horario_inicio;
-                    if (!reservaIndex[key]) reservaIndex[key] = [];
-                    reservaIndex[key].push(r);
-                    if (r.tipo === 'UNICA' && r.data_reserva) {
-                        if (!reservaByDate[r.data_reserva]) reservaByDate[r.data_reserva] = [];
-                        reservaByDate[r.data_reserva].push(r);
-                    }
-                }
-            }
-
-            function getWeekDates() {
-                var hoje = new Date();
-                hoje.setDate(hoje.getDate() + (state.semanaOffset * 7));
-                var dow = (hoje.getDay() + 6) % 7;
-                var seg = new Date(hoje);
-                seg.setDate(seg.getDate() - dow);
-                var map = {};
-                for (var i = 0; i < 7; i++) {
-                    var d = new Date(seg);
-                    d.setDate(seg.getDate() + i);
-                    map[DIAS_SEMANA_ISO[i]] = d;
-                }
-                return map;
-            }
-
-            function fixaVisivelNaData(r, cellDate) {
-                if (!cellDate) return true;
-                var cellIso = fmtIso(cellDate);
-                if (r.data_inicio && cellIso < r.data_inicio) return false;
-                if (r.data_fim && cellIso > r.data_fim) return false;
-                return true;
-            }
-
-            function filterForCell(reservas, diaKey, hora, cellDate) {
-                var key = diaKey + '|' + hora;
-                var bucket = reservaIndex[key];
-                if (!bucket || !bucket.length) return [];
-                var results = [];
-                for (var i = 0; i < bucket.length; i++) {
-                    var r = bucket[i];
-                    if (r.tipo === 'FIXA' || r.tipo === 'MENSALISTA') {
-                        if (fixaVisivelNaData(r, cellDate)) results.push(r);
-                    } else if (r.tipo === 'UNICA') {
-                        if (cellDate && r.data_reserva && sameDate(new Date(r.data_reserva + 'T00:00:00'), cellDate))
-                            results.push(r);
-                    }
-                }
-                return results;
-            }
-
-            function filterForMonthDay(reservas, diaKey, ano, mes, dia) {
-                var cellDate = new Date(ano, mes, dia);
-                var cellIso = fmtIso(cellDate);
-                var results = [];
-                for (var key in reservaIndex) {
-                    if (key.indexOf(diaKey + '|') !== 0) continue;
-                    var bucket = reservaIndex[key];
-                    for (var i = 0; i < bucket.length; i++) {
-                        if ((bucket[i].tipo === 'FIXA' || bucket[i].tipo === 'MENSALISTA') && fixaVisivelNaData(bucket[
-                                i], cellDate))
-                            results.push(bucket[i]);
-                    }
-                }
-                var dateBucket = reservaByDate[cellIso];
-                if (dateBucket) {
-                    for (var j = 0; j < dateBucket.length; j++) {
-                        results.push(dateBucket[j]);
-                    }
-                }
-                return results;
-            }
-
-            function countForMonth(reservas, ano, mes) {
-                if (!reservas || !reservas.length) return {
-                    fixas: 0,
-                    unicas: 0
-                };
-                var ultimoDia = new Date(ano, mes + 1, 0).getDate();
-                var fixas = 0,
-                    unicas = 0;
-                for (var d = 1; d <= ultimoDia; d++) {
-                    var iso = ano + '-' + String(mes + 1).padStart(2, '0') + '-' + String(d).padStart(2, '0');
-                    var dateBucket = reservaByDate[iso];
-                    if (dateBucket) unicas += dateBucket.length;
-                }
-                var fixaCounted = {};
-                for (var key in reservaIndex) {
-                    var bucket = reservaIndex[key];
-                    for (var i = 0; i < bucket.length; i++) {
-                        var r = bucket[i];
-                        if (r.tipo !== 'FIXA' && r.tipo !== 'MENSALISTA') continue;
-                        if (fixaCounted[r.id]) continue;
-                        for (var d2 = 1; d2 <= ultimoDia; d2++) {
-                            var dKey = DIAS_SEMANA_ISO[(new Date(ano, mes, d2).getDay() + 6) % 7];
-                            if (dKey !== r.dia_semana) continue;
-                            var cellDate = new Date(ano, mes, d2);
-                            if (fixaVisivelNaData(r, cellDate)) {
-                                fixas++;
-                                fixaCounted[r.id] = true;
-                                break;
-                            }
-                        }
-                    }
-                }
-                return {
-                    fixas: fixas,
-                    unicas: unicas
-                };
-            }
-
-            function showLoading(show) {
-                if ($loadingEl) $loadingEl.style.display = show ? 'flex' : 'none';
-                if ($calContainer) $calContainer.style.display = show ? 'none' : 'block';
-            }
-
-            function setCalHtml(html) {
-                requestAnimationFrame(function() {
-                    $calContainer.innerHTML = html;
-                });
-            }
-
-            function renderChip(r) {
-                var cls = 'rv rv--' + r.tipo.toLowerCase();
-                var dataAttr = canEditar ? ' data-rv-id="' + r.id + '"' : '';
-                var h = '<div class="' + cls + '"' + dataAttr + '><div class="rv__info">';
-                if (!state.area && r.area_nome) h += '<div class="rv__area">' + escHtml(r.area_nome) +
-                    '</div>';
-                h += '<div class="rv__name">' + escHtml(r.cliente_nome) + '</div>';
-                if (r.horario_inicio && r.horario_fim && r.slots_ocupados > 1) {
-                    h += '<div class="rv__date">' + r.horario_inicio + ' - ' + r.horario_fim + '</div>';
-                }
-                if (r.tipo === 'UNICA' && r.data_formatada) h += '<div class="rv__date">' + r.data_formatada + '</div>';
-                if ((r.tipo === 'FIXA' || r.tipo === 'MENSALISTA') && (r.data_inicio || r.data_fim)) {
-                    var p = r.data_inicio ? fmtBr(r.data_inicio) : '';
-                    p += ' → ';
-                    p += r.data_fim ? fmtBr(r.data_fim) : '∞';
-                    h += '<div class="rv__date">' + p + '</div>';
-                }
-                if (r.valor_final) h += '<div class="rv__obs">R$ ' + parseFloat(r.valor_final).toFixed(2).replace('.',
-                    ',') + '</div>';
-                if (r.obs) h += '<div class="rv__obs">' + escHtml(r.obs) + '</div>';
-                h += '</div><span class="rv__badge">' + r.tipo + '</span></div>';
-                return h;
             }
 
             function fmtBr(iso) {
@@ -2289,361 +1711,666 @@
                 return p[2] + '/' + p[1] + '/' + p[0];
             }
 
-            function renderCellChips(items, cellId) {
-                if (!items.length) return '';
-                var h = '';
-                var visible = items.slice(0, MAX_CHIPS_CELL);
-                var hidden = items.slice(MAX_CHIPS_CELL);
-                for (var i = 0; i < visible.length; i++) h += renderChip(visible[i]);
-                if (hidden.length) {
-                    h += '<div class="cell-overflow" id="overflow-' + cellId + '" style="display:none">';
-                    for (var j = 0; j < hidden.length; j++) h += renderChip(hidden[j]);
-                    h += '</div><button type="button" class="cell-more" data-more="' + cellId +
-                        '">+' + hidden.length + ' reserva' + (hidden.length > 1 ? 's' : '') + '</button>';
+            function getWeekDates() {
+                var h = new Date();
+                h.setDate(h.getDate() + state.semanaOffset * 7);
+                var dow = (h.getDay() + 6) % 7;
+                var seg = new Date(h);
+                seg.setDate(seg.getDate() - dow);
+                var map = {};
+                for (var i = 0; i < 7; i++) {
+                    var d = new Date(seg);
+                    d.setDate(seg.getDate() + i);
+                    map[DIAS_KEY[i]] = d;
                 }
-                return h;
+                return map;
             }
 
-            function renderWeek(reservas) {
-                var hoje = new Date();
-                var weekDates = getWeekDates();
-                var dias = getGridDias();
-                var horarios = getGridHorarios();
-                if (!horarios.length) {
-                    setCalHtml(
-                        '<div class="empty-state"><i class="fi fi-rr-calendar-xmark"></i><div class="empty-state__text">Nenhum horário disponível</div></div>'
-                    );
-                    return;
+            function getAreasDoTipo() {
+                return areasPorTipo.length && areasPorTipo[state.tipoIdx] ? areasPorTipo[state.tipoIdx].areas : [];
+            }
+
+            function getModoDoTipo() {
+                var a = getAreasDoTipo();
+                return a.length ? a[0].modo_reserva : 'HORARIO';
+            }
+
+            function getHorariosForArea(areaId, dia) {
+                for (var i = 0; i < todasAreas.length; i++) {
+                    if (todasAreas[i].id === areaId && todasAreas[i].horarios && todasAreas[i].horarios[dia])
+                    return todasAreas[i].horarios[dia];
                 }
-                var h = '<div class="week-grid"><table><thead><tr><th>Horário</th>';
-                for (var di = 0; di < dias.length; di++) {
-                    var dia = dias[di],
-                        dt = weekDates[dia],
-                        isHoje = dt && sameDate(dt, hoje);
-                    h += '<th' + (isHoje ? ' class="th-today"' : '') + '>' + (DIAS_PT[dia] || dia);
-                    if (dt) h += '<small>' + dt.getDate() + '/' + (dt.getMonth() + 1) + (isHoje ? ' •' : '') +
-                        '</small>';
-                    h += '</th>';
+                return [];
+            }
+
+            function indexReservas() {
+                reservaMap = {};
+                if (!state.reservas) return;
+                for (var i = 0; i < state.reservas.length; i++) reservaMap[state.reservas[i].id] = state.reservas[i];
+            }
+
+            function getFiltered() {
+                if (state._filtered) return state._filtered;
+                var r = state.reservas || [];
+                if (state.filtroTipo) r = r.filter(function(x) {
+                    return x.tipo === state.filtroTipo;
+                });
+                if (state.filtroBusca) {
+                    var t = state.filtroBusca.toLowerCase();
+                    r = r.filter(function(x) {
+                        return (x.cliente_nome && x.cliente_nome.toLowerCase().indexOf(t) !== -1) || (x.obs && x
+                            .obs.toLowerCase().indexOf(t) !== -1);
+                    });
                 }
-                h += '</tr></thead><tbody>';
-                var ci = 0;
-                for (var hi = 0; hi < horarios.length; hi++) {
-                    var hora = horarios[hi];
-                    h += '<tr><td class="td-hora">' + hora + '</td>';
-                    for (var dj = 0; dj < dias.length; dj++) {
-                        var dia2 = dias[dj],
-                            dt2 = weekDates[dia2];
-                        var celula = filterForCell(reservas, dia2, hora, dt2);
-                        var cid = 'w' + ci++;
-                        h += '<td>' + renderCellChips(celula, cid);
-                        if (canCriar) {
-                            var dtIso = dt2 ? fmtIso(dt2) : '';
-                            h += '<button type="button" class="cell-add" data-add data-add-dia="' + dia2 +
-                                '" data-add-hora="' +
-                                hora + '" data-add-data="' + dtIso + '"><i class="fi fi-rr-plus-small"></i></button>';
+                state._filtered = r;
+                return r;
+            }
+
+            function invalidateFiltered() {
+                state._filtered = null;
+            }
+
+            function findDiaInteiro(reservas, areaId, dia, cellDate) {
+                var results = [];
+                for (var i = 0; i < reservas.length; i++) {
+                    var r = reservas[i];
+                    if (r.area_id !== areaId || r.dia_semana !== dia) continue;
+                    if (r.tipo === 'UNICA') {
+                        if (cellDate && r.data_reserva === cellDate) results.push(r);
+                    } else {
+                        if (!cellDate) {
+                            results.push(r);
+                            continue;
                         }
-                        h += '</td>';
+                        if (r.data_inicio && cellDate < r.data_inicio) continue;
+                        if (r.data_fim && cellDate > r.data_fim) continue;
+                        results.push(r);
                     }
-                    h += '</tr>';
                 }
-                h += '</tbody></table></div>';
-                setCalHtml(h);
+                return results;
             }
 
-            function renderDay(reservas) {
-                var dias = getGridDias(),
-                    horarios = getGridHorarios(),
-                    diaDate, dia;
-                if (state.dataRefDia) {
-                    diaDate = new Date(state.dataRefDia + 'T12:00:00');
-                    dia = DIAS_SEMANA_ISO[(diaDate.getDay() + 6) % 7];
-                } else if (state.area) {
-                    dia = dias[state.diaAtual];
-                    diaDate = getWeekDates()[dia];
-                } else {
-                    diaDate = new Date();
-                    dia = DIAS_SEMANA_ISO[(diaDate.getDay() + 6) % 7];
+            function fixaVisivelNaData(r, cellDate) {
+                if (!cellDate) return true;
+                if (r.tipo === 'UNICA') return r.data_reserva === cellDate;
+                if (r.data_inicio && cellDate < r.data_inicio) return false;
+                if (r.data_fim && cellDate > r.data_fim) return false;
+                return true;
+            }
+
+            function areaNome(areaId) {
+                for (var i = 0; i < todasAreas.length; i++) {
+                    if (todasAreas[i].id === areaId) return todasAreas[i].nome;
                 }
-                if (!horarios.length) {
-                    setCalHtml(
-                        '<div class="empty-state"><i class="fi fi-rr-calendar-xmark"></i><div class="empty-state__text">Nenhum horário disponível</div></div>'
-                    );
+                return '';
+            }
+
+            function diaLbl(key) {
+                for (var i = 0; i < DIAS.length; i++) {
+                    if (DIAS[i].key === key) return DIAS[i].label;
+                }
+                return key;
+            }
+
+            function findResAtSlot(reservas, areaId, dia, hora, cellDate) {
+                for (var i = 0; i < reservas.length; i++) {
+                    var r = reservas[i];
+                    if (r.area_id !== areaId || r.dia_semana !== dia || !fixaVisivelNaData(r, cellDate)) continue;
+                    if (r.horario_inicio === hora) return {
+                        type: 'exact',
+                        reserva: r
+                    };
+                    if (r.horario_inicio < hora && r.horario_fim > hora) return {
+                        type: 'multi',
+                        reserva: r
+                    };
+                }
+                return null;
+            }
+
+            function showRvToast(msg, type) {
+                if (type === 'error') SdbToast.error(msg);
+                else if (type === 'success') SdbToast.success(msg);
+                else SdbToast.warning(msg);
+            }
+
+            function isSlotSelected(areaId, dia, hora) {
+                var s = state.sel;
+                return s && s.areaId === areaId && s.dia === dia && s.slots.indexOf(hora) !== -1;
+            }
+
+            window.handleSlotClick = function(areaId, dia, hora) {
+                if (!canCriar) return;
+                var reservas = getFiltered();
+                var dates = getWeekDates();
+                var cellDate = dates[dia] ? fmtIso(dates[dia]) : null;
+
+                if (findResAtSlot(reservas, areaId, dia, hora, cellDate)) return;
+
+                var area = null;
+                for (var i = 0; i < todasAreas.length; i++) {
+                    if (todasAreas[i].id === areaId) {
+                        area = todasAreas[i];
+                        break;
+                    }
+                }
+                if (!area) return;
+
+                var s = state.sel;
+                if (!s || s.areaId !== areaId || s.dia !== dia) {
+                    state.sel = {
+                        areaId: areaId,
+                        areaNome: areaNome(areaId),
+                        dia: dia,
+                        slots: [hora],
+                        startHora: hora
+                    };
+                    showRvToast(areaNome(areaId) + ' · ' + hora +
+                        ' selecionado — clique outro horário para expandir ou "Reservar" para confirmar', 'info'
+                        );
+                    render();
                     return;
                 }
-                var h = '<div class="day-grid">';
-                var ci = 0;
-                for (var i = 0; i < horarios.length; i++) {
-                    var hora = horarios[i];
-                    var celula = filterForCell(reservas, dia, hora, diaDate);
-                    var cid = 'd' + ci++;
-                    h += '<div class="day-slot"><div class="day-slot__hora">' + hora +
-                        '</div><div class="day-slot__body">';
-                    if (!celula.length) h += '<div class="day-slot__empty">Livre</div>';
-                    else h += renderCellChips(celula, cid);
-                    if (canCriar) {
-                        var dtIso = diaDate ? fmtIso(diaDate) : '';
-                        h += '<button type="button" class="cell-add" data-add data-add-dia="' + dia +
-                            '" data-add-hora="' +
-                            hora + '" data-add-data="' + dtIso +
-                            '"><i class="fi fi-rr-plus-small"></i> Reservar</button>';
-                    }
-                    h += '</div></div>';
+
+                var hrs = getHorariosForArea(areaId, dia);
+                var startIdx = hrs.indexOf(s.startHora);
+                var endIdx = hrs.indexOf(hora);
+                if (startIdx === -1 || endIdx === -1) return;
+
+                var lo = Math.min(startIdx, endIdx);
+                var hi = Math.max(startIdx, endIdx);
+                var range = hrs.slice(lo, hi + 1);
+
+                var conflicts = [];
+                for (var j = 0; j < range.length; j++) {
+                    var found = findResAtSlot(reservas, areaId, dia, range[j], cellDate);
+                    if (found) conflicts.push(range[j] + ' (' + found.reserva.cliente_nome + ')');
                 }
-                h += '</div>';
-                setCalHtml(h);
+
+                if (conflicts.length) {
+                    showRvToast('Conflito: ' + conflicts.join(', ') + ' — selecione outro intervalo', 'error');
+                    return;
+                }
+
+                var totalMin = range.length * 60;
+                var horas = Math.floor(totalMin / 60);
+                var mins = totalMin % 60;
+                var durLabel = mins > 0 ? horas + 'h' + mins + 'min' : horas + 'h';
+
+                state.sel = {
+                    areaId: areaId,
+                    areaNome: areaNome(areaId),
+                    dia: dia,
+                    slots: range,
+                    startHora: s.startHora
+                };
+                showRvToast(areaNome(areaId) + ' · ' + range[0] + ' — ' + range[range.length - 1] + ' · ' + range
+                    .length + ' slots · ' + durLabel, 'success');
+                render();
+            };
+
+            window.limparSelecao = function() {
+                state.sel = null;
+                render();
+            };
+
+            window.confirmarSelecao = function() {
+                var s = state.sel;
+                if (!s || !s.slots.length) return;
+                var horaFim = s.slots[s.slots.length - 1];
+                var hParts = horaFim.split(':');
+                var endH = parseInt(hParts[0]) + 1;
+                var endTime = endH < 24 ? String(endH).padStart(2, '0') + ':' + hParts[1] : '23:59';
+                var dates = getWeekDates();
+                var dataIso = dates[s.dia] ? fmtIso(dates[s.dia]) : '';
+
+                restoreModalBody();
+                $modalTitulo.textContent = 'Nova Reserva';
+                $modalInfoChips.innerHTML = buildInfoChips(s.areaNome, s.dia, s.slots[0], endTime, dataIso);
+
+                m.rId.value = '';
+                m.rDia.value = s.dia;
+                m.rHorario.value = s.slots[0];
+                limparCliente();
+                m.rTipo.value = 'UNICA';
+                m.rData.value = dataIso;
+                m.rDataInicio.value = '';
+                m.rDataFim.value = '';
+                m.rObs.value = '';
+                m.fieldData.style.display = 'block';
+                m.fieldFixa.style.display = 'none';
+                m.fieldArea.style.display = 'none';
+                m.rArea.value = s.areaId;
+
+                if (s.slots.length > 1) {
+                    m.fieldDuracao.style.display = 'block';
+                    if (m.rDuracaoMin) m.rDuracaoMin.value = s.slots.length * 60;
+                    m.multiWarn.style.display = 'block';
+                    m.multiMsg.textContent = 'O último slot (' + horaFim + ') pode ser utilizado parcialmente. ' + s
+                        .slots.length + ' slots selecionados (' + (s.slots.length * 60) +
+                        'min). Ajuste a duração real se necessário.';
+                    m.rHorario.setAttribute('data-fim', endTime);
+                    m.rHorario.setAttribute('data-slots', s.slots.length);
+                } else {
+                    m.fieldDuracao.style.display = 'none';
+                    m.multiWarn.style.display = 'none';
+                    m.rHorario.removeAttribute('data-fim');
+                    m.rHorario.removeAttribute('data-slots');
+                }
+
+                if ($btnExcluir) $btnExcluir.style.display = 'none';
+                $btnSalvar.style.display = 'inline-flex';
+                $modalOverlay.classList.add('is-open');
+                setTimeout(function() {
+                    m.rClienteBusca.focus();
+                }, 300);
+            };
+
+            function renderSelBar() {
+                var s = state.sel;
+                if (!s || !s.slots.length) {
+                    $selBar.classList.remove('is-open');
+                    return;
+                }
+                $selBar.classList.add('is-open');
+                $selTitle.textContent = s.areaNome + ' · ' + diaLbl(s.dia);
+                var detail = s.slots[0];
+                if (s.slots.length > 1) detail += ' — ' + s.slots[s.slots.length - 1];
+                detail += ' · ' + s.slots.length + ' slot' + (s.slots.length > 1 ? 's' : '');
+                $selDetail.textContent = detail;
             }
 
-            function renderMonth(reservas) {
-                var hoje = new Date(),
-                    ano = state.anoAtual,
-                    mes = state.mesAtual;
-                var primeiroDia = new Date(ano, mes, 1);
-                var ultimoDia = new Date(ano, mes + 1, 0);
-                var diaSemanaInicio = (primeiroDia.getDay() + 6) % 7;
-                var h = '<div class="month-grid"><table><thead><tr>';
-                var diasCurtos = ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom'];
-                for (var i = 0; i < 7; i++) h += '<th>' + diasCurtos[i] + '</th>';
-                h += '</tr></thead><tbody><tr>';
-                for (var e = 0; e < diaSemanaInicio; e++) h += '<td class="month-cell--empty"></td>';
-                for (var d = 1; d <= ultimoDia.getDate(); d++) {
-                    var diaSemana = DIAS_SEMANA_ISO[(new Date(ano, mes, d).getDay() + 6) % 7];
-                    var diaRes = filterForMonthDay(reservas, diaSemana, ano, mes, d);
-                    var fixas = 0,
-                        unicas = 0;
-                    for (var k = 0; k < diaRes.length; k++) {
-                        if (diaRes[k].tipo === 'FIXA') fixas++;
-                        else unicas++;
-                    }
-                    var isHoje = d === hoje.getDate() && mes === hoje.getMonth() && ano === hoje.getFullYear();
-                    h += '<td class="month-cell" data-goto-dia="' + d + '">';
-                    h += '<div class="month-day' + (isHoje ? ' month-day--today' : '') + '">' + d + '</div>';
-                    if (fixas) h += '<div class="month-count month-count--fixa">' + fixas + ' fixa' + (fixas > 1 ? 's' :
-                        '') + '</div> ';
-                    if (unicas) h += '<div class="month-count month-count--unica">' + unicas + ' única' + (unicas > 1 ?
-                        's' : '') + '</div>';
-                    h += '</td>';
-                    if ((diaSemanaInicio + d) % 7 === 0 && d < ultimoDia.getDate()) h += '</tr><tr>';
+            function renderTabs() {
+                var h = '';
+                for (var i = 0; i < areasPorTipo.length; i++) {
+                    var g = areasPorTipo[i];
+                    h += '<button type="button" class="rv-tab' + (i === state.tipoIdx ? ' active' : '') +
+                        '" onclick="selecionarTipo(' + i + ')">';
+                    h += '<i class="fi ' + escHtml(g.tipo_icone) + '" style="color:' + escHtml(g.tipo_cor) + '"></i> ';
+                    h += escHtml(g.tipo_nome) + '</button>';
                 }
-                var cellsUsed = diaSemanaInicio + ultimoDia.getDate();
-                var remaining = (7 - (cellsUsed % 7)) % 7;
-                for (var e2 = 0; e2 < remaining; e2++) h += '<td class="month-cell--empty"></td>';
-                h += '</tr></tbody></table></div>';
-                setCalHtml(h);
+                $tabs.innerHTML = h;
             }
 
-            function renderYear(reservas) {
-                var hoje = new Date(),
-                    ano = state.anoAtual;
-                var h = '<div class="year-grid">';
-                for (var m = 0; m < 12; m++) {
-                    var isCurrent = m === hoje.getMonth() && ano === hoje.getFullYear();
-                    var primeiroDia = new Date(ano, m, 1);
-                    var numDias = new Date(ano, m + 1, 0).getDate();
-                    var diaSemanaInicio = (primeiroDia.getDay() + 6) % 7;
-                    var counts = countForMonth(reservas, ano, m);
-                    var total = counts.fixas + counts.unicas;
-                    var diasOcupados = {};
-                    for (var d = 1; d <= numDias; d++) {
-                        var dKey = DIAS_SEMANA_ISO[(new Date(ano, m, d).getDay() + 6) % 7];
-                        if (filterForMonthDay(reservas, dKey, ano, m, d).length) diasOcupados[d] = true;
+            function renderWeekNav() {
+                if (state.viewMode === 'semana') {
+                    var dates = getWeekDates();
+                    var seg = dates['SEGUNDA'],
+                        dom = dates['DOMINGO'];
+                    var fmt = function(d) {
+                        return String(d.getDate()).padStart(2, '0') + '/' + String(d.getMonth() + 1).padStart(2,
+                            '0');
+                    };
+                    $weekLabel.textContent = fmt(seg) + ' — ' + fmt(dom) + '/' + dom.getFullYear();
+                    $todayBtn.style.display = state.semanaOffset !== 0 ? 'inline-flex' : 'none';
+                } else {
+                    $weekLabel.textContent = MESES[state.mesAtual] + ' ' + state.anoAtual;
+                    var hoje = new Date();
+                    $todayBtn.style.display = (state.mesAtual !== hoje.getMonth() || state.anoAtual !== hoje
+                        .getFullYear()) ? 'inline-flex' : 'none';
+                }
+            }
+
+            function renderDaySelector() {
+                if (state.viewMode === 'mes' || getModoDoTipo() === 'DIA_INTEIRO') {
+                    $daySelector.style.display = 'none';
+                    return;
+                }
+                $daySelector.style.display = 'flex';
+                var dates = getWeekDates();
+                var hojeStr = fmtIso(new Date());
+                var reservas = getFiltered();
+                var h = '';
+                for (var i = 0; i < DIAS.length; i++) {
+                    var d = DIAS[i],
+                        dt = dates[d.key];
+                    var isToday = dt && fmtIso(dt) === hojeStr;
+                    var isSel = d.key === state.diaSel;
+                    var count = 0;
+                    for (var j = 0; j < reservas.length; j++) {
+                        if (reservas[j].dia_semana === d.key) count++;
                     }
-                    h += '<div class="year-month' + (isCurrent ? ' year-month--current' : '') +
-                        '" data-goto-mes="' + m + '">';
-                    h += '<div class="year-month__head"><span>' + MESES_PT[m] + '</span>';
-                    h += '<span class="year-month__count"' + (total ? '' : ' style="opacity:.4"') + '>' + (total ||
-                        '—') + '</span></div>';
-                    h += '<div class="year-month__body"><div class="year-mini-grid">';
-                    var hdrLetters = ['S', 'T', 'Q', 'Q', 'S', 'S', 'D'];
-                    for (var hl = 0; hl < 7; hl++) h += '<div class="year-mini-grid__hdr">' + hdrLetters[hl] + '</div>';
-                    for (var e = 0; e < diaSemanaInicio; e++) h +=
-                        '<div class="year-mini-day year-mini-day--empty">.</div>';
-                    for (var d2 = 1; d2 <= numDias; d2++) {
-                        var isHoje = d2 === hoje.getDate() && m === hoje.getMonth() && ano === hoje.getFullYear();
-                        var cls = 'year-mini-day';
-                        if (isHoje) cls += ' year-mini-day--today';
-                        else if (diasOcupados[d2]) cls += ' year-mini-day--has';
-                        h += '<div class="' + cls + '">' + d2 + '</div>';
+                    h += '<button type="button" class="rv-day' + (isSel ? ' active' : '') + (isToday && !isSel ?
+                        ' today' : '') + '" onclick="selecionarDia(\'' + d.key + '\')">';
+                    h += '<span class="rv-day__abbr">' + d.abbr + '</span>';
+                    h += '<span class="rv-day__num">' + (dt ? dt.getDate() : '') + '</span>';
+                    if (count > 0) h += '<span class="rv-day__count">' + count + '</span>';
+                    h += '</button>';
+                }
+                $daySelector.innerHTML = h;
+            }
+
+            function renderStats() {
+                if (state.viewMode === 'mes') {
+                    $stats.innerHTML = '';
+                    return;
+                }
+                var modo = getModoDoTipo();
+                var areas = getAreasDoTipo();
+                var reservas = getFiltered();
+                var livres = 0,
+                    ocupados = 0;
+
+                if (modo === 'HORARIO') {
+                    var dates = getWeekDates();
+                    var cellDate = dates[state.diaSel] ? fmtIso(dates[state.diaSel]) : null;
+                    for (var ai = 0; ai < areas.length; ai++) {
+                        var hrs = getHorariosForArea(areas[ai].id, state.diaSel);
+                        for (var hi = 0; hi < hrs.length; hi++) {
+                            if (findResAtSlot(reservas, areas[ai].id, state.diaSel, hrs[hi], cellDate)) ocupados++;
+                            else livres++;
+                        }
                     }
-                    h += '</div></div>';
-                    if (counts.fixas || counts.unicas) {
-                        h += '<div class="year-month__stats">';
-                        if (counts.fixas) h += '<span class="year-month__stat year-month__stat--fixa">' + counts.fixas +
-                            ' fixa</span>';
-                        if (counts.unicas) h += '<span class="year-month__stat year-month__stat--unica">' + counts
-                            .unicas + ' única' + (counts.unicas > 1 ? 's' : '') + '</span>';
-                        h += '</div>';
+                } else {
+                    var dates2 = getWeekDates();
+                    for (var di = 0; di < DIAS.length; di++) {
+                        var cd = dates2[DIAS[di].key] ? fmtIso(dates2[DIAS[di].key]) : null;
+                        for (var ai2 = 0; ai2 < areas.length; ai2++) {
+                            if (findDiaInteiro(reservas, areas[ai2].id, DIAS[di].key, cd).length) ocupados++;
+                            else livres++;
+                        }
                     }
+                }
+
+                var total = livres + ocupados;
+                var pct = total > 0 ? Math.round((ocupados / total) * 100) : 0;
+                $stats.innerHTML = '<div class="rv-stat rv-stat--green"><span class="rv-stat__num">' + livres +
+                    '</span><span class="rv-stat__label">Livres</span></div>' +
+                    '<div class="rv-stat rv-stat--blue"><span class="rv-stat__num">' + ocupados +
+                    '</span><span class="rv-stat__label">Ocupados</span></div>' +
+                    '<div class="rv-stat rv-stat--amber"><span class="rv-stat__num">' + pct +
+                    '%</span><span class="rv-stat__label">Ocupação</span></div>';
+            }
+
+            function renderChip(r) {
+                var tipo = escHtml(r.tipo);
+                var action = canEditar ? 'abrirModalEditar(' + r.id + ')' : 'verDetalhe(' + r.id + ')';
+                return '<button type="button" class="rv-chip rv-chip--' + tipo + '" onclick="' + action + '" title="' +
+                    escHtml(r.cliente_nome) + ' (' + tipo + ')">' +
+                    '<span class="rv-chip__dot"></span><span class="rv-chip__name">' + escHtml(r.cliente_nome) +
+                    '</span>' +
+                    '<span class="rv-chip__badge">' + tipo.substring(0, 3) + '</span></button>';
+            }
+
+            function renderLanes() {
+                var areas = getAreasDoTipo(),
+                    dia = state.diaSel;
+                var reservas = getFiltered();
+                var dates = getWeekDates();
+                var cellDate = dates[dia] ? fmtIso(dates[dia]) : null;
+
+                if (!areas.length) {
+                    $gridContainer.innerHTML =
+                        '<div class="rv-empty"><i class="fi fi-rr-info"></i><div>Nenhuma área neste tipo</div></div>';
+                    return;
+                }
+
+                var anyHorarios = false;
+                for (var ci = 0; ci < areas.length; ci++) {
+                    if (getHorariosForArea(areas[ci].id, dia).length) {
+                        anyHorarios = true;
+                        break;
+                    }
+                }
+                if (!anyHorarios) {
+                    $gridContainer.innerHTML =
+                        '<div class="rv-empty"><i class="fi fi-rr-calendar-xmark"></i><div>Nenhum horário configurado para este dia</div></div>';
+                    return;
+                }
+
+                var h = '<div class="rv-lanes">';
+                for (var ai = 0; ai < areas.length; ai++) {
+                    var area = areas[ai];
+                    var hrs = getHorariosForArea(area.id, dia);
+                    var ocCount = 0;
+
+                    h += '<div class="rv-lane"><div class="rv-lane__head">';
+                    h += '<div class="rv-lane__name">' + escHtml(area.nome) + '</div>';
+                    if (area.descricao) h += '<div class="rv-lane__desc">' + escHtml(area.descricao) + '</div>';
+                    h += '</div><div class="rv-lane__body">';
+
+                    if (!hrs.length) {
+                        h +=
+                        '<div class="rv-slot"><div class="rv-slot__body" style="text-align:center;color:var(--t4);font-size:.78rem;font-style:italic;padding:12px 0">Sem horários neste dia</div></div>';
+                    } else {
+                        for (var hi = 0; hi < hrs.length; hi++) {
+                            var hora = hrs[hi];
+                            var found = findResAtSlot(reservas, area.id, dia, hora, cellDate);
+                            var selected = isSlotSelected(area.id, dia, hora);
+
+                            h += '<div class="rv-slot' + (selected ? ' rv-slot--selected' : '') +
+                                '"><span class="rv-slot__time">' + hora + '</span><div class="rv-slot__body">';
+                            if (found && found.type === 'multi') {
+                                h += '<div class="rv-multi-slot"></div>';
+                                ocCount++;
+                            } else if (found) {
+                                h += renderChip(found.reserva);
+                                ocCount++;
+                            } else {
+                                if (canCriar) {
+                                    h += '<button type="button" class="rv-livre' + (selected ? ' rv-livre--selected' :
+                                            '') + '" onclick="handleSlotClick(' + area.id + ',\'' + dia + '\',\'' +
+                                        hora + '\')">';
+                                    h += selected ? '<i class="fi fi-rr-check"></i> Selecionado' :
+                                        '<i class="fi fi-rr-plus-small"></i> Livre';
+                                    h += '</button>';
+                                }
+                            }
+                            h += '</div></div>';
+                        }
+                    }
+
+                    h += '</div>';
+                    h += '<div class="rv-lane__foot">' + ocCount + '/' + hrs.length + ' ocupados</div>';
                     h += '</div>';
                 }
                 h += '</div>';
-                setCalHtml(h);
+                $gridContainer.innerHTML = h;
             }
 
-            function renderView() {
-                $pageTitle.textContent = state.area ? state.area.nome : 'Todas as Áreas';
-                var r = state.reservas || [];
-                switch (state.view) {
-                    case 'week':
-                        renderWeek(r);
-                        break;
-                    case 'day':
-                        renderDay(r);
-                        break;
-                    case 'month':
-                        renderMonth(r);
-                        break;
-                    case 'year':
-                        renderYear(r);
-                        break;
+            function renderLanesDiaInteiro() {
+                var areas = getAreasDoTipo(),
+                    reservas = getFiltered();
+                var dates = getWeekDates(),
+                    hoje = fmtIso(new Date());
+
+                if (!areas.length) {
+                    $gridContainer.innerHTML =
+                        '<div class="rv-empty"><i class="fi fi-rr-info"></i><div>Nenhuma área neste tipo</div></div>';
+                    return;
                 }
+
+                var h = '<div class="rv-lanes">';
+                for (var ai = 0; ai < areas.length; ai++) {
+                    var area = areas[ai];
+                    h += '<div class="rv-lane" style="min-width:140px"><div class="rv-lane__head">';
+                    h += '<div class="rv-lane__name">' + escHtml(area.nome) + '</div>';
+                    h += '</div><div class="rv-lane__body">';
+
+                    for (var di = 0; di < DIAS.length; di++) {
+                        var d = DIAS[di],
+                            dt = dates[d.key];
+                        var cellDate = dt ? fmtIso(dt) : null;
+                        var isToday = cellDate === hoje;
+                        var found = findDiaInteiro(reservas, area.id, d.key, cellDate);
+
+                        h += '<div class="rv-slot' + (isToday ? ' rv-slot--today' : '') + '">';
+                        h += '<span class="rv-slot__time" style="min-width:34px">' + d.abbr;
+                        if (dt) h += '<br><span style="font-size:.6rem;opacity:.5;font-weight:400">' + dt.getDate() +
+                            '/' + (dt.getMonth() + 1) + '</span>';
+                        h += '</span><div class="rv-slot__body">';
+                        if (found.length) {
+                            for (var fi = 0; fi < found.length; fi++) h += renderChip(found[fi]);
+                        } else if (canCriar) {
+                            h += '<button type="button" class="rv-livre" onclick="abrirModalNovo(\'' + d.key +
+                                '\',null,\'' + (cellDate || '') + '\',' + area.id + ')">';
+                            h += '<i class="fi fi-rr-plus-small"></i></button>';
+                        }
+                        h += '</div></div>';
+                    }
+
+                    h += '</div></div>';
+                }
+                h += '</div>';
+                $gridContainer.innerHTML = h;
             }
 
-            function renderPeriodBar() {
-                var bar = $periodBar;
-                if (!bar) return;
-                bar.style.display = 'flex';
+            function renderMonth() {
+                var reservas = getFiltered();
+                var areas = getAreasDoTipo();
+                var areaIds = {};
+                for (var ai = 0; ai < areas.length; ai++) areaIds[areas[ai].id] = true;
                 var hoje = new Date();
-                var totalReservas = state.reservas ? state.reservas.length : 0;
-                var h = '';
-                if (state.view === 'week') {
-                    var wDates = getWeekDates();
-                    var seg = wDates['SEGUNDA'],
-                        dom = wDates['DOMINGO'];
-                    h +=
-                        '<button type="button" class="period-bar__btn" onclick="navWeek(-1)"><i class="fi fi-rr-angle-left"></i></button>';
-                    h += '<span class="period-bar__label">' + seg.getDate() + ' ' + MESES_PT[seg.getMonth()] + ' — ' +
-                        dom.getDate() + ' ' + MESES_PT[dom.getMonth()] + ' ' + dom.getFullYear() + '</span>';
-                    h +=
-                        '<button type="button" class="period-bar__btn" onclick="navWeek(1)"><i class="fi fi-rr-angle-right"></i></button>';
-                    h += '<div class="period-bar__divider"></div>';
-                    h += '<span class="period-bar__count">' + totalReservas + ' reserva' + (totalReservas !== 1 ? 's' :
-                        '') + '</span>';
-                    if (state.semanaOffset !== 0) {
-                        h += '<div class="period-bar__divider"></div>';
-                        h += '<button type="button" class="period-bar__today" onclick="voltarHoje()">Hoje</button>';
-                    }
-                } else if (state.view === 'day') {
-                    var diaDate, diaKey;
-                    if (state.dataRefDia) {
-                        diaDate = new Date(state.dataRefDia + 'T12:00:00');
-                        diaKey = DIAS_SEMANA_ISO[(diaDate.getDay() + 6) % 7];
-                    } else if (state.area) {
-                        diaKey = getGridDias()[state.diaAtual];
-                        diaDate = getWeekDates()[diaKey];
-                    } else {
-                        diaDate = new Date();
-                        diaKey = DIAS_SEMANA_ISO[(diaDate.getDay() + 6) % 7];
-                    }
-                    h +=
-                        '<button type="button" class="period-bar__btn" onclick="navDay(-1)"><i class="fi fi-rr-angle-left"></i></button>';
-                    h += '<span class="period-bar__label">' + (DIAS_PT[diaKey] || diaKey);
-                    if (diaDate) h += ', ' + diaDate.getDate() + ' de ' + MESES_PT[diaDate.getMonth()] + ' ' + diaDate
+                var primeiro = new Date(state.anoAtual, state.mesAtual, 1);
+                var ultimo = new Date(state.anoAtual, state.mesAtual + 1, 0);
+                var dowInicio = (primeiro.getDay() + 6) % 7;
+
+                var h = '<div class="rv-month"><div class="rv-month__grid">';
+                var hdrDias = ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom'];
+                for (var hd = 0; hd < 7; hd++) h += '<div class="rv-month__hdr">' + hdrDias[hd] + '</div>';
+
+                for (var e = 0; e < dowInicio; e++) h += '<div class="rv-month__cell rv-month__cell--empty"></div>';
+
+                for (var d = 1; d <= ultimo.getDate(); d++) {
+                    var dt = new Date(state.anoAtual, state.mesAtual, d);
+                    var dk = DIAS_KEY[(dt.getDay() + 6) % 7];
+                    var isToday = d === hoje.getDate() && state.mesAtual === hoje.getMonth() && state.anoAtual === hoje
                         .getFullYear();
-                    h += '</span>';
-                    h +=
-                        '<button type="button" class="period-bar__btn" onclick="navDay(1)"><i class="fi fi-rr-angle-right"></i></button>';
-                    h += '<div class="period-bar__divider"></div>';
-                    h += '<span class="period-bar__count">' + totalReservas + ' reserva' + (totalReservas !== 1 ? 's' :
-                        '') + '</span>';
-                    h += '<div class="period-bar__divider"></div>';
-                    h += '<button type="button" class="period-bar__today" onclick="voltarHoje()">Hoje</button>';
-                } else if (state.view === 'month') {
-                    h +=
-                        '<button type="button" class="period-bar__btn" onclick="navMonth(-1)"><i class="fi fi-rr-angle-left"></i></button>';
-                    h += '<span class="period-bar__label">' + MESES_PT[state.mesAtual] + ' ' + state.anoAtual +
-                        '</span>';
-                    h +=
-                        '<button type="button" class="period-bar__btn" onclick="navMonth(1)"><i class="fi fi-rr-angle-right"></i></button>';
-                    h += '<div class="period-bar__divider"></div>';
-                    h += '<span class="period-bar__count">' + totalReservas + ' reserva' + (totalReservas !== 1 ? 's' :
-                        '') + '</span>';
-                } else if (state.view === 'year') {
-                    h +=
-                        '<button type="button" class="period-bar__btn" onclick="navYear(-1)"><i class="fi fi-rr-angle-left"></i></button>';
-                    h += '<span class="period-bar__label">' + state.anoAtual + '</span>';
-                    h +=
-                        '<button type="button" class="period-bar__btn" onclick="navYear(1)"><i class="fi fi-rr-angle-right"></i></button>';
-                    h += '<div class="period-bar__divider"></div>';
-                    h += '<span class="period-bar__count">' + totalReservas + ' reserva' + (totalReservas !== 1 ? 's' :
-                        '') + '</span>';
+
+                    var fixas = 0,
+                        unicas = 0,
+                        mensalistas = 0;
+                    var isoDate = fmtIso(dt);
+                    for (var ri = 0; ri < reservas.length; ri++) {
+                        var r = reservas[ri];
+                        if (!areaIds[r.area_id]) continue;
+                        if (r.dia_semana !== dk || !fixaVisivelNaData(r, isoDate)) continue;
+                        if (r.tipo === 'FIXA') fixas++;
+                        else if (r.tipo === 'UNICA') unicas++;
+                        else mensalistas++;
+                    }
+
+                    h += '<div class="rv-month__cell" onclick="irParaDia(' + d + ',' + state.mesAtual + ',' + state
+                        .anoAtual + ')">';
+                    h += '<div class="rv-month__day' + (isToday ? ' rv-month__day--today' : '') + '">' + d + '</div>';
+                    if (fixas) h += '<span class="rv-month__badge rv-month__badge--fixas">' + fixas + ' fixa' + (fixas >
+                        1 ? 's' : '') + '</span> ';
+                    if (unicas) h += '<span class="rv-month__badge rv-month__badge--unicas">' + unicas + ' única' + (
+                        unicas > 1 ? 's' : '') + '</span> ';
+                    if (mensalistas) h += '<span class="rv-month__badge rv-month__badge--mensalistas">' + mensalistas +
+                        ' mensal</span>';
+                    h += '</div>';
                 }
-                bar.innerHTML = h;
+
+                h += '</div></div>';
+                $gridContainer.innerHTML = h;
+            }
+
+            function render() {
+                invalidateFiltered();
+                renderTabs();
+                renderWeekNav();
+                renderDaySelector();
+                renderStats();
+                renderSelBar();
+
+                document.querySelectorAll('.rv-view-btn').forEach(function(b) {
+                    b.classList.toggle('active', b.dataset.view === state.viewMode);
+                });
+
+                if (state.viewMode === 'mes') {
+                    renderMonth();
+                } else if (getModoDoTipo() === 'HORARIO') {
+                    renderLanes();
+                } else {
+                    renderLanesDiaInteiro();
+                }
+                updatePageSub();
+                updateExportLinks();
             }
 
             function updatePageSub() {
-                var hoje = new Date();
-                var total = state.reservas ? state.reservas.length : 0;
-                $pageSub.textContent = DIAS_PT[hojeKey()] + ', ' + fmtLong(hoje) + ' — ' + total + ' reserva' + (
-                    total !== 1 ? 's' : '') + ' carregadas';
+                var grupo = areasPorTipo[state.tipoIdx];
+                var reservas = getFiltered();
+                var period = state.viewMode === 'mes' ? 'no mês' : 'na semana';
+                document.getElementById('pageSub').textContent = (grupo ? grupo.tipo_nome : '') + ' · ' + reservas
+                    .length + ' reserva' + (reservas.length !== 1 ? 's' : '') + ' ' + period;
             }
 
             function updateExportLinks() {
-                var params = new URLSearchParams();
-                if (state.areaId) params.set('area_id', state.areaId);
-                if (state.filtroTipo) params.set('tipo', state.filtroTipo);
-                if (state.filtroCliente) params.set('busca', state.filtroCliente);
-                var qs = params.toString();
-                if ($btnPdf) $btnPdf.href = ROUTE_EXPORT_PDF + (qs ? '?' + qs : '');
-                if ($btnXlsx) $btnXlsx.href = ROUTE_EXPORT_XLSX + (qs ? '?' + qs : '');
-            }
-
-            function getDataRef() {
-                switch (state.view) {
-                    case 'day':
-                        if (state.dataRefDia) return state.dataRefDia;
-                        var dias = state.area ? state.area.dias : DIAS_SEMANA_ISO;
-                        var dk = dias[state.diaAtual] || dias[0];
-                        var wd = getWeekDates();
-                        return wd[dk] ? fmtIso(wd[dk]) : fmtIso(new Date());
-                    case 'week':
-                        var d = new Date();
-                        d.setDate(d.getDate() + (state.semanaOffset * 7));
-                        return fmtIso(d);
-                    case 'month':
-                        return fmtIso(new Date(state.anoAtual, state.mesAtual, 1));
-                    case 'year':
-                        return fmtIso(new Date(state.anoAtual, 0, 1));
-                    default:
-                        return fmtIso(new Date());
+                var params;
+                if (state.viewMode === 'mes') {
+                    params = 'view=month&data_ref=' + state.anoAtual + '-' + String(state.mesAtual + 1).padStart(2,
+                        '0') + '-01';
+                } else {
+                    var dates = getWeekDates();
+                    params = 'view=week&data_ref=' + fmtIso(dates['SEGUNDA']);
                 }
+                if (state.filtroBusca) params += '&busca=' + encodeURIComponent(state.filtroBusca);
+                $btnPdf.href = ROUTE_EXPORT_PDF + '?' + params;
+                $btnXlsx.href = ROUTE_EXPORT_XLSX + '?' + params;
             }
 
-            function fetchApi(url, options) {
-                options = options || {};
-                var token = document.querySelector('meta[name="csrf-token"]');
-                options.headers = Object.assign({
+            function showLoading(v) {
+                $loading.style.display = v ? 'flex' : 'none';
+                $gridContainer.style.opacity = v ? '.4' : '1';
+            }
+
+            function fetchApi(url, opts) {
+                opts = opts || {};
+                opts.headers = Object.assign({
                     'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': token ? token.getAttribute('content') : '',
+                    'X-CSRF-TOKEN': CSRF,
                     'Accept': 'application/json'
-                }, options.headers || {});
-                return fetch(url, options).then(function(res) {
-                    if (!res.ok) throw res;
-                    return res.json();
+                }, opts.headers || {});
+                return fetch(url, opts).then(function(r) {
+                    if (!r.ok) {
+                        var err = new Error('HTTP ' + r.status);
+                        err.status = r.status;
+                        err.json = function() {
+                            return r.json();
+                        };
+                        throw err;
+                    }
+                    return r.json();
                 });
             }
 
             function carregarDados() {
                 if (currentAbort) currentAbort.abort();
                 currentAbort = new AbortController();
+
+                var dataRef, view;
+                if (state.viewMode === 'mes') {
+                    dataRef = state.anoAtual + '-' + String(state.mesAtual + 1).padStart(2, '0') + '-01';
+                    view = 'month';
+                } else {
+                    var dates = getWeekDates();
+                    dataRef = fmtIso(dates['SEGUNDA']);
+                    view = 'week';
+                }
+
+                var params = 'view=' + view + '&data_ref=' + dataRef;
+                if (state.filtroBusca) params += '&busca=' + encodeURIComponent(state.filtroBusca);
+
                 state.loading = true;
                 showLoading(true);
-                var params = new URLSearchParams();
-                if (state.areaId) params.set('area_id', state.areaId);
-                params.set('view', state.view);
-                params.set('data_ref', getDataRef());
-                if (state.filtroTipo) params.set('tipo', state.filtroTipo);
-                if (state.filtroCliente) params.set('busca', state.filtroCliente);
-                fetchApi(ROUTE_DATA + '?' + params.toString(), {
+
+                fetch(ROUTE_DATA + '?' + params, {
+                        headers: {
+                            'Accept': 'application/json',
+                            'X-CSRF-TOKEN': CSRF
+                        },
                         signal: currentAbort.signal
                     })
+                    .then(function(r) {
+                        if (!r.ok) throw new Error('HTTP ' + r.status);
+                        return r.json();
+                    })
                     .then(function(data) {
-                        if (data.area) state.area = data.area;
                         state.reservas = data.reservas || [];
                         indexReservas();
-                        renderPeriodBar();
-                        renderView();
-                        updatePageSub();
-                        updateExportLinks();
+                        render();
                     })
                     .catch(function(err) {
                         if (err.name !== 'AbortError') SdbToast.error('Erro ao carregar dados');
@@ -2654,338 +2381,345 @@
                     });
             }
 
-            window.selecionarArea = function(val) {
-                state.areaId = val ? parseInt(val) : null;
-                state.area = null;
-                state.diaAtual = 0;
+            window.selecionarTipo = function(idx) {
+                state.tipoIdx = idx;
+                state.sel = null;
+                render();
+            };
+            window.selecionarDia = function(dia) {
+                state.diaSel = dia;
+                state.sel = null;
+                render();
+            };
+
+            window.navPeriodo = function(dir) {
+                if (state.viewMode === 'mes') {
+                    var m = state.mesAtual + dir;
+                    if (m < 0) {
+                        state.mesAtual = 11;
+                        state.anoAtual--;
+                    } else if (m > 11) {
+                        state.mesAtual = 0;
+                        state.anoAtual++;
+                    } else state.mesAtual = m;
+                } else {
+                    state.semanaOffset += dir;
+                }
+                state.sel = null;
+                carregarDados();
+            };
+
+            window.irParaHoje = function() {
+                var hoje = new Date();
                 state.semanaOffset = 0;
-                $pageTitle.textContent = state.areaId ? '' : 'Todas as Áreas';
-                updateExportLinks();
+                state.mesAtual = hoje.getMonth();
+                state.anoAtual = hoje.getFullYear();
+                state.diaSel = DIAS_KEY[(hoje.getDay() + 6) % 7];
+                state.sel = null;
                 carregarDados();
             };
 
-            window.trocarView = function(view) {
-                state.view = view;
-                if (view !== 'day') state.dataRefDia = null;
-                else if (!state.area && !state.dataRefDia) state.dataRefDia = fmtIso(new Date());
-                if (view !== 'week' && view !== 'day') state.semanaOffset = 0;
-                $viewModes.forEach(function(b) {
-                    b.classList.toggle('active', b.dataset.view === view);
+            window.trocarView = function(v) {
+                state.viewMode = v;
+                state.sel = null;
+                carregarDados();
+            };
+
+            window.irParaDia = function(d, m, a) {
+                var dt = new Date(a, m, d);
+                var hoje = new Date();
+                var diff = Math.round((dt - new Date(hoje.getFullYear(), hoje.getMonth(), hoje.getDate())) /
+                    86400000);
+                var weekDiff = Math.floor((diff + ((hoje.getDay() + 6) % 7)) / 7);
+                state.semanaOffset = weekDiff;
+                state.diaSel = DIAS_KEY[(dt.getDay() + 6) % 7];
+                state.viewMode = 'semana';
+                state.sel = null;
+                carregarDados();
+            };
+
+            window.filtrarTipo = function(el) {
+                state.filtroTipo = el.getAttribute('data-tipo');
+                document.querySelectorAll('.rv-tipo-chip').forEach(function(b) {
+                    b.classList.toggle('active', b.getAttribute('data-tipo') === state.filtroTipo);
                 });
-                carregarDados();
-            };
-
-            window.filtrarTipo = function(tipo) {
-                state.filtroTipo = tipo;
-                $chipTodos.classList.toggle('active', !tipo);
-                $chipFixa.classList.toggle('active', tipo === 'FIXA');
-                $chipUnica.classList.toggle('active', tipo === 'UNICA');
-                $chipMensalista.classList.toggle('active', tipo === 'MENSALISTA');
-                carregarDados();
+                render();
             };
 
             window.debounceBusca = function() {
                 clearTimeout(debounceTimer);
                 debounceTimer = setTimeout(function() {
-                    state.filtroCliente = $filtroCliente.value.trim();
+                    state.filtroBusca = $busca.value.trim();
                     carregarDados();
                 }, 400);
             };
 
-            window.navDay = function(dir) {
-                if (state.dataRefDia) {
-                    var dt = new Date(state.dataRefDia + 'T12:00:00');
-                    dt.setDate(dt.getDate() + dir);
-                    state.dataRefDia = fmtIso(dt);
-                    state.mesAtual = dt.getMonth();
-                    state.anoAtual = dt.getFullYear();
-                    carregarDados();
-                    return;
+            function buildInfoChips(areaLabel, diaKey, horInicio, horFim, dataIso) {
+                var chips = '<span class="modal-info-chip"><i class="fi fi-rr-marker" style="font-size:.7rem"></i> ' +
+                    escHtml(areaLabel) + '</span>';
+                chips += '<span class="modal-info-chip"><i class="fi fi-rr-calendar" style="font-size:.7rem"></i> ' +
+                    escHtml(diaLbl(diaKey));
+                if (dataIso) chips += ' ' + fmtBr(dataIso);
+                chips += '</span>';
+                if (horInicio) {
+                    chips += '<span class="modal-info-chip"><i class="fi fi-rr-clock" style="font-size:.7rem"></i> ' +
+                        horInicio;
+                    if (horFim && horFim !== horInicio) chips += ' — ' + horFim;
+                    chips += '</span>';
                 }
-                if (state.area) {
-                    var dias = state.area.dias;
-                    state.diaAtual = (state.diaAtual + dir + dias.length) % dias.length;
-                    carregarDados();
-                    return;
-                }
-                state.dataRefDia = fmtIso(new Date());
-                var dt2 = new Date(state.dataRefDia + 'T12:00:00');
-                dt2.setDate(dt2.getDate() + dir);
-                state.dataRefDia = fmtIso(dt2);
-                state.mesAtual = dt2.getMonth();
-                state.anoAtual = dt2.getFullYear();
-                carregarDados();
-            };
+                return chips;
+            }
 
-            window.navWeek = function(dir) {
-                state.semanaOffset += dir;
-                carregarDados();
-            };
-
-            window.navMonth = function(dir) {
-                state.mesAtual += dir;
-                if (state.mesAtual > 11) {
-                    state.mesAtual = 0;
-                    state.anoAtual++;
-                }
-                if (state.mesAtual < 0) {
-                    state.mesAtual = 11;
-                    state.anoAtual--;
-                }
-                carregarDados();
-            };
-
-            window.navYear = function(dir) {
-                state.anoAtual += dir;
-                carregarDados();
-            };
-
-            window.irParaMes = function(mes) {
-                state.mesAtual = mes;
-                state.view = 'month';
-                state.dataRefDia = null;
-                $viewModes.forEach(function(b) {
-                    b.classList.toggle('active', b.dataset.view === 'month');
-                });
-                carregarDados();
-            };
-
-            window.irParaDia = function(dia) {
-                var data = new Date(state.anoAtual, state.mesAtual, dia);
-                state.dataRefDia = fmtIso(data);
-                state.view = 'day';
-                state.semanaOffset = Math.round((data.getTime() - new Date().getTime()) / (7 * 86400000));
-                if (state.area) {
-                    var diaKey = DIAS_SEMANA_ISO[(data.getDay() + 6) % 7];
-                    var idx = state.area.dias.indexOf(diaKey);
-                    if (idx >= 0) state.diaAtual = idx;
-                }
-                $viewModes.forEach(function(b) {
-                    b.classList.toggle('active', b.dataset.view === 'day');
-                });
-                carregarDados();
-            };
-
-            window.voltarHoje = function() {
-                var hoje = new Date();
-                state.mesAtual = hoje.getMonth();
-                state.anoAtual = hoje.getFullYear();
-                state.semanaOffset = 0;
-                state.dataRefDia = null;
-                if (state.view === 'day' && state.area) {
-                    var idx = state.area.dias.indexOf(hojeKey());
-                    if (idx >= 0) state.diaAtual = idx;
-                }
-                carregarDados();
-            };
-
-            window.toggleOverflow = function(cellId, btn) {
-                var el = document.getElementById('overflow-' + cellId);
-                if (!el) return;
-                var showing = el.style.display === 'none';
-                el.style.display = showing ? 'block' : 'none';
-                var total = el.children.length;
-                btn.textContent = showing ? '− recolher' : ('+' + total + ' reserva' + (total > 1 ? 's' : ''));
-            };
-
-            window.buscarCliente = function() {
-                var termo = $rClienteBusca.value.trim();
-                if (cliSearchTimer) clearTimeout(cliSearchTimer);
-                if (termo.length < 2) {
-                    $cliResults.classList.remove('is-open');
-                    return;
-                }
-                cliSearchTimer = setTimeout(function() {
-                    fetch(ROUTE_BUSCAR_CLIENTE + '?termo=' + encodeURIComponent(termo), {
-                            headers: {
-                                'Accept': 'application/json',
-                                'X-CSRF-TOKEN': csrfToken
-                            }
-                        })
-                        .then(function(r) {
-                            return r.json();
-                        })
-                        .then(function(clientes) {
-                            if (!clientes.length) {
-                                $cliResults.innerHTML =
-                                    '<div class="cli-result-item" style="color:var(--t4)">Nenhum cliente encontrado</div>';
-                            } else {
-                                var h = '';
-                                for (var i = 0; i < clientes.length; i++) {
-                                    h += '<div class="cli-result-item" onclick="selecionarCliente(' +
-                                        clientes[i].id + ',\'' + escHtml(clientes[i].nome).replace(/'/g,
-                                            "\\'") + '\',\'' + escHtml(clientes[i].telefone || '')
-                                        .replace(/'/g, "\\'") + '\')">';
-                                    h += escHtml(clientes[i].nome);
-                                    if (clientes[i].telefone) h +=
-                                        '<span class="cli-result-item__tel">' + escHtml(clientes[i]
-                                            .telefone) + '</span>';
-                                    h += '</div>';
-                                }
-                                $cliResults.innerHTML = h;
-                            }
-                            $cliResults.classList.add('is-open');
-                        })
-                        .catch(function() {
-                            $cliResults.classList.remove('is-open');
-                        });
-                }, 300);
-            };
-
-            window.selecionarCliente = function(id, nome, telefone) {
-                $rClienteId.value = id;
-                $cliSelectedNome.textContent = nome + (telefone ? ' · ' + telefone : '');
-                $cliSelected.style.display = 'flex';
-                $rClienteBusca.parentElement.style.display = 'none';
-                $cliResults.classList.remove('is-open');
-            };
-
-            window.limparCliente = function() {
-                $rClienteId.value = '';
-                $cliSelectedNome.textContent = '';
-                $cliSelected.style.display = 'none';
-                $rClienteBusca.parentElement.style.display = 'block';
-                $rClienteBusca.value = '';
-                $cliResults.classList.remove('is-open');
-            };
-
-            window.onTipoChange = function() {
-                var tipo = $rTipo.value;
-                $fieldData.style.display = tipo === 'UNICA' ? 'block' : 'none';
-                $fieldFixa.style.display = (tipo === 'FIXA' || tipo === 'MENSALISTA') ? 'block' : 'none';
-            };
-
-            window.abrirModalNovo = function(dia, horario, dataIso) {
-                if (!canCriar) return;
-                var titulo = (DIAS_PT[dia] || dia) + ' — ' + horario;
-                if (dataIso) {
-                    var p = dataIso.split('-');
-                    titulo += ' — ' + p[2] + '/' + p[1] + '/' + p[0];
-                }
-                $modalTitulo.textContent = titulo;
-                $rId.value = '';
-                $rDia.value = dia;
-                $rHorario.value = horario;
-                limparCliente();
-                $rClienteBusca.value = '';
-                $rTipo.value = 'UNICA';
-                $rData.value = dataIso || '';
-                $rDataInicio.value = '';
-                $rDataFim.value = '';
-                $rObs.value = '';
-                $fieldData.style.display = 'block';
-                $fieldFixa.style.display = 'none';
-                if (!state.area) {
-                    $fieldArea.style.display = 'block';
-                    $rArea.value = '';
+            function restoreModalBody() {
+                var body = document.querySelector('.modal-body');
+                if (_modalBodyHtml === null) {
+                    _modalBodyHtml = body.innerHTML;
                 } else {
-                    $fieldArea.style.display = 'none';
-                    $rArea.value = state.areaId || '';
+                    body.innerHTML = _modalBodyHtml;
+                }
+                m = rebindModalEls();
+            }
+
+            window.verDetalhe = function(id) {
+                var r = reservaMap[id];
+                if (!r) return;
+                $modalTitulo.textContent = 'Detalhes da Reserva';
+                $modalInfoChips.innerHTML = buildInfoChips(r.area_nome || areaNome(r.area_id), r.dia_semana, r
+                    .horario_inicio, r.horario_fim, null);
+                var body = document.querySelector('.modal-body');
+                var h =
+                    '<div style="margin-top:8px"><div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">';
+                h += '<div style="width:40px;height:40px;border-radius:50%;background:var(--bg);display:flex;align-items:center;justify-content:center;font-size:1.1rem;font-weight:700;color:var(--t2)">' +
+                    escHtml((r.cliente_nome || '?')[0]) + '</div>';
+                h += '<div><div style="font-weight:600;color:var(--t1)">' + escHtml(r.cliente_nome) + '</div>';
+                if (r.cliente_telefone) h += '<div style="font-size:.78rem;color:var(--t3)">' + escHtml(r
+                    .cliente_telefone) + '</div>';
+                h += '</div></div><div style="display:grid;gap:8px">';
+                h += '<div style="display:flex;justify-content:space-between;padding:8px 12px;border-radius:8px;background:var(--bg)"><span style="color:var(--t3);font-size:.78rem">Tipo</span><span style="font-weight:600;font-size:.82rem;color:var(--t1)">' +
+                    escHtml(r.tipo) + '</span></div>';
+                if (r.valor_final) h +=
+                    '<div style="display:flex;justify-content:space-between;padding:8px 12px;border-radius:8px;background:var(--bg)"><span style="color:var(--t3);font-size:.78rem">Valor</span><span style="font-weight:600;font-size:.82rem;color:var(--t1)">R$ ' +
+                    parseFloat(r.valor_final).toFixed(2).replace('.', ',') + '</span></div>';
+                if (r.obs) h +=
+                    '<div style="padding:8px 12px;border-radius:8px;background:var(--bg)"><span style="color:var(--t3);font-size:.78rem;display:block;margin-bottom:4px">Obs</span><span style="font-size:.82rem;color:var(--t1)">' +
+                    escHtml(r.obs) + '</span></div>';
+                h += '</div></div>';
+                body.innerHTML = h;
+                if ($btnExcluir) $btnExcluir.style.display = 'none';
+                $btnSalvar.style.display = 'none';
+                $modalOverlay.classList.add('is-open');
+            };
+
+            window.abrirModalNovo = function(dia, horario, dataIso, areaId) {
+                if (!canCriar) return;
+                restoreModalBody();
+                $modalTitulo.textContent = 'Nova Reserva';
+                $modalInfoChips.innerHTML = buildInfoChips(areaNome(areaId), dia, horario, null, dataIso);
+                m.rId.value = '';
+                m.rDia.value = dia;
+                m.rHorario.value = horario || '';
+                limparCliente();
+                m.rTipo.value = 'UNICA';
+                m.rData.value = dataIso || '';
+                m.rDataInicio.value = '';
+                m.rDataFim.value = '';
+                m.rObs.value = '';
+                m.fieldData.style.display = 'block';
+                m.fieldFixa.style.display = 'none';
+                m.fieldArea.style.display = 'none';
+                m.rArea.value = areaId || '';
+                m.fieldDuracao.style.display = 'none';
+                m.multiWarn.style.display = 'none';
+                if (horario) {
+                    var hp = horario.split(':');
+                    var eh = parseInt(hp[0]) + 1;
+                    var singleFim = eh < 24 ? String(eh).padStart(2, '0') + ':' + hp[1] : '23:59';
+                    m.rHorario.setAttribute('data-fim', singleFim);
+                    m.rHorario.setAttribute('data-slots', '1');
+                } else {
+                    m.rHorario.removeAttribute('data-fim');
+                    m.rHorario.removeAttribute('data-slots');
                 }
                 if ($btnExcluir) $btnExcluir.style.display = 'none';
-                limparCliente();
-                $rClienteBusca.value = '';
+                $btnSalvar.style.display = 'inline-flex';
                 $modalOverlay.classList.add('is-open');
                 setTimeout(function() {
-                    (state.area ? $rClienteBusca : $rArea).focus();
+                    m.rClienteBusca.focus();
                 }, 300);
             };
 
             window.abrirModalEditar = function(id) {
                 var r = reservaMap[id];
-                if (!r) return;
+                if (!r || !canEditar) return;
+                restoreModalBody();
                 $modalTitulo.textContent = 'Editar Reserva';
-                $rId.value = r.id;
-                $rDia.value = r.dia_semana;
-                $rHorario.value = r.horario_inicio || '';
-                $rClienteId.value = r.cliente_id || '';
-                $rClienteBusca.value = '';
+                $modalInfoChips.innerHTML = buildInfoChips(r.area_nome || areaNome(r.area_id), r.dia_semana, r
+                    .horario_inicio, r.horario_fim, null);
+                m.rId.value = r.id;
+                m.rDia.value = r.dia_semana;
+                m.rHorario.value = r.horario_inicio || '';
+                m.rClienteId.value = r.cliente_id || '';
                 if (r.cliente_id && r.cliente_nome) {
-                    $cliSelectedNome.textContent = r.cliente_nome + (r.cliente_telefone ? ' · ' + r
+                    m.cliSelectedNome.textContent = r.cliente_nome + (r.cliente_telefone ? ' · ' + r
                         .cliente_telefone : '');
-                    $cliSelected.style.display = 'flex';
-                    $rClienteBusca.parentElement.style.display = 'none';
+                    m.cliSelected.style.display = 'flex';
+                    m.rClienteBusca.parentElement.style.display = 'none';
                 } else {
                     limparCliente();
                 }
-                $rTipo.value = r.tipo || 'UNICA';
-                $rData.value = r.data_reserva || '';
-                $rDataInicio.value = r.data_inicio || '';
-                $rDataFim.value = r.data_fim || '';
-                $rObs.value = r.obs || '';
-                $fieldData.style.display = r.tipo === 'UNICA' ? 'block' : 'none';
-                $fieldFixa.style.display = (r.tipo === 'FIXA' || r.tipo === 'MENSALISTA') ? 'block' : 'none';
-                if (!state.area) {
-                    $fieldArea.style.display = 'block';
-                    $rArea.value = r.area_id || '';
-                } else {
-                    $fieldArea.style.display = 'none';
-                    $rArea.value = r.area_id || state.areaId || '';
-                }
+                m.rTipo.value = r.tipo || 'UNICA';
+                m.rData.value = r.data_reserva || '';
+                m.rDataInicio.value = r.data_inicio || '';
+                m.rDataFim.value = r.data_fim || '';
+                m.rObs.value = r.obs || '';
+                m.fieldData.style.display = r.tipo === 'UNICA' ? 'block' : 'none';
+                m.fieldFixa.style.display = (r.tipo === 'FIXA' || r.tipo === 'MENSALISTA') ? 'block' : 'none';
+                m.fieldArea.style.display = 'none';
+                m.rArea.value = r.area_id || '';
+                m.fieldDuracao.style.display = 'none';
+                m.multiWarn.style.display = 'none';
                 if ($btnExcluir) $btnExcluir.style.display = 'inline-flex';
+                $btnSalvar.style.display = 'inline-flex';
                 $modalOverlay.classList.add('is-open');
-                setTimeout(function() {
-                    $rClienteBusca.focus();
-                }, 300);
             };
 
             window.fecharModal = function() {
                 $modalOverlay.classList.remove('is-open');
             };
 
+            window.onTipoChange = function() {
+                var tipo = m.rTipo.value;
+                m.fieldData.style.display = tipo === 'UNICA' ? 'block' : 'none';
+                m.fieldFixa.style.display = (tipo === 'FIXA' || tipo === 'MENSALISTA') ? 'block' : 'none';
+            };
+
+            window.limparCliente = function() {
+                m.rClienteId.value = '';
+                m.cliSelectedNome.textContent = '';
+                m.cliSelected.style.display = 'none';
+                m.rClienteBusca.parentElement.style.display = 'block';
+                m.rClienteBusca.value = '';
+                m.cliResults.classList.remove('is-open');
+            };
+            window.selecionarCliente = function(id, nome, telefone) {
+                m.rClienteId.value = id;
+                m.cliSelectedNome.textContent = nome + (telefone ? ' · ' + telefone : '');
+                m.cliSelected.style.display = 'flex';
+                m.rClienteBusca.parentElement.style.display = 'none';
+                m.cliResults.classList.remove('is-open');
+            };
+
+            window.buscarCliente = function() {
+                clearTimeout(cliSearchTimer);
+                var termo = m.rClienteBusca.value.trim();
+                if (termo.length < 2) {
+                    m.cliResults.classList.remove('is-open');
+                    return;
+                }
+                cliSearchTimer = setTimeout(function() {
+                    fetch(ROUTE_BUSCAR_CLIENTE + '?termo=' + encodeURIComponent(termo), {
+                            headers: {
+                                'Accept': 'application/json',
+                                'X-CSRF-TOKEN': CSRF
+                            }
+                        })
+                        .then(function(r) {
+                            return r.json();
+                        })
+                        .then(function(data) {
+                            if (!data.length) {
+                                m.cliResults.innerHTML =
+                                    '<div class="cli-result-item" style="color:var(--t3);cursor:default">Nenhum cliente encontrado</div>';
+                            } else {
+                                var h = '';
+                                for (var i = 0; i < data.length; i++) {
+                                    var c = data[i];
+                                    h += '<div class="cli-result-item" data-cli-id="' + c.id +
+                                        '" data-cli-nome="' + escHtml(c.nome) + '" data-cli-tel="' +
+                                        escHtml(c.telefone || '') + '">' + escHtml(c.nome);
+                                    if (c.telefone) h += '<small>' + escHtml(c.telefone) + '</small>';
+                                    h += '</div>';
+                                }
+                                m.cliResults.innerHTML = h;
+                            }
+                            m.cliResults.classList.add('is-open');
+                        }).catch(function() {
+                            SdbToast.error('Erro ao buscar clientes');
+                        });
+                }, 300);
+            };
+
+            document.addEventListener('click', function(e) {
+                var cliRes = document.getElementById('cliResults');
+                if (cliRes && cliRes.classList.contains('is-open') && !e.target.closest('.cli-search-wrap'))
+                    cliRes.classList.remove('is-open');
+                var item = e.target.closest('.cli-result-item[data-cli-id]');
+                if (item) selecionarCliente(parseInt(item.dataset.cliId), item.dataset.cliNome, item.dataset
+                    .cliTel);
+            });
+
             window.salvarReserva = function() {
                 if ($btnSalvar.disabled) return;
-                var id = $rId.value;
-                var clienteId = $rClienteId.value;
+                var id = m.rId.value;
+                var clienteId = m.rClienteId.value;
                 if (!clienteId) {
                     SdbToast.error('Selecione um cliente');
                     return;
                 }
-                var areaId = state.areaId || $rArea.value;
+                var areaId = m.rArea.value;
                 if (!areaId) {
                     SdbToast.error('Selecione a área');
                     return;
                 }
-                var tipo = $rTipo.value;
-                if (tipo === 'UNICA' && !$rData.value) {
+                var tipo = m.rTipo.value;
+                if (tipo === 'UNICA' && !m.rData.value) {
                     SdbToast.error('Informe a data da reserva');
                     return;
                 }
+
                 var dados = {
                     area_id: parseInt(areaId),
                     cliente_id: parseInt(clienteId),
-                    dia_semana: $rDia.value,
-                    horario_inicio: $rHorario.value || null,
+                    dia_semana: m.rDia.value,
+                    horario_inicio: m.rHorario.value || null,
                     tipo: tipo,
-                    data_reserva: tipo === 'UNICA' ? ($rData.value || null) : null,
-                    data_inicio: (tipo === 'FIXA' || tipo === 'MENSALISTA') ? ($rDataInicio.value || null) :
+                    data_reserva: tipo === 'UNICA' ? (m.rData.value || null) : null,
+                    data_inicio: (tipo === 'FIXA' || tipo === 'MENSALISTA') ? (m.rDataInicio.value || null) :
                         null,
-                    data_fim: (tipo === 'FIXA' || tipo === 'MENSALISTA') ? ($rDataFim.value || null) : null,
-                    obs: $rObs.value || null
+                    data_fim: (tipo === 'FIXA' || tipo === 'MENSALISTA') ? (m.rDataFim.value || null) : null,
+                    obs: m.rObs.value || null
                 };
+
+                var fimAttr = m.rHorario.getAttribute('data-fim');
+                var slotsAttr = m.rHorario.getAttribute('data-slots');
+                if (fimAttr && slotsAttr) {
+                    dados.horario_fim = fimAttr;
+                    dados.slots_ocupados = parseInt(slotsAttr);
+                    var duracaoInput = m.rDuracaoMin ? parseInt(m.rDuracaoMin.value) : null;
+                    if (duracaoInput && duracaoInput > 0) dados.duracao_real_min = duracaoInput;
+                }
+
                 $btnSalvar.disabled = true;
                 $btnSalvar.innerHTML = '<span class="btn-spinner"></span>';
-                var url = id ? ROUTE_UPDATE.replace('__ID__', id) : ROUTE_STORE;
-                var method = id ? 'PUT' : 'POST';
-                fetchApi(url, {
-                        method: method,
+
+                fetchApi(id ? ROUTE_UPDATE.replace('__ID__', id) : ROUTE_STORE, {
+                        method: id ? 'PUT' : 'POST',
                         body: JSON.stringify(dados)
                     })
                     .then(function() {
                         SdbToast.success(id ? 'Reserva atualizada' : 'Reserva criada');
                         fecharModal();
+                        state.sel = null;
                         carregarDados();
                     })
                     .catch(function(err) {
                         if (err.status === 422) {
                             err.json().then(function(data) {
-                                var msgs = Object.values(data.errors || {}).flat();
-                                SdbToast.error(msgs.join(', ') || 'Dados inválidos');
+                                SdbToast.error(Object.values(data.errors || {}).flat().join(', ') ||
+                                    'Dados inválidos');
                             });
                         } else if (err.status === 403) {
                             SdbToast.error('Sem permissão para esta ação');
-                        } else if (err.status === 409) {
-                            SdbToast.error('Conflito: já existe reserva neste horário');
                         } else {
                             SdbToast.error('Erro ao salvar reserva');
                         }
@@ -2997,13 +2731,9 @@
             };
 
             window.excluirReserva = function() {
-                var id = $rId.value;
+                var id = m.rId.value;
                 if (!id) return;
                 confirmar('Tem certeza que deseja excluir esta reserva?', function() {
-                    if ($btnExcluir) {
-                        $btnExcluir.disabled = true;
-                        $btnExcluir.innerHTML = '<span class="btn-spinner"></span>';
-                    }
                     fetchApi(ROUTE_DESTROY.replace('__ID__', id), {
                             method: 'DELETE'
                         })
@@ -3013,77 +2743,27 @@
                             carregarDados();
                         })
                         .catch(function(err) {
-                            if (err.status === 403) SdbToast.error('Sem permissão para excluir');
-                            else SdbToast.error('Erro ao excluir reserva');
-                        })
-                        .finally(function() {
-                            if ($btnExcluir) {
-                                $btnExcluir.disabled = false;
-                                $btnExcluir.innerHTML = '<i class="fi fi-rr-trash"></i> Excluir';
-                            }
+                            SdbToast.error(err.status === 403 ? 'Sem permissão' :
+                                'Erro ao excluir reserva');
                         });
                 });
             };
 
-            function confirmar(msg, callback) {
-                $confirmMsg.textContent = msg;
-                confirmCallback = callback;
+            function confirmar(msg, cb) {
+                document.getElementById('confirmMsg').textContent = msg;
+                confirmCallback = cb;
                 $confirmOverlay.classList.add('is-open');
             }
-
-            window.fecharConfirm = function(confirmed) {
+            window.fecharConfirm = function(ok) {
                 $confirmOverlay.classList.remove('is-open');
-                if (confirmed && confirmCallback) confirmCallback();
+                if (ok && confirmCallback) confirmCallback();
                 confirmCallback = null;
             };
 
+            _modalBodyHtml = document.querySelector('.modal-body').innerHTML;
             indexReservas();
-            updateExportLinks();
-            renderPeriodBar();
-            renderView();
-            updatePageSub();
-            showLoading(false);
+            render();
 
-            $calContainer.addEventListener('click', function(e) {
-                var target = e.target;
-                var chip = target.closest('[data-rv-id]');
-                if (chip) {
-                    e.stopPropagation();
-                    abrirModalEditar(parseInt(chip.dataset.rvId));
-                    return;
-                }
-                var addBtn = target.closest('[data-add]');
-                if (addBtn) {
-                    var d = addBtn.dataset;
-                    abrirModalNovo(d.addDia, d.addHora, d.addData || '');
-                    return;
-                }
-                var moreBtn = target.closest('[data-more]');
-                if (moreBtn) {
-                    toggleOverflow(moreBtn.dataset.more, moreBtn);
-                    return;
-                }
-                var monthCell = target.closest('[data-goto-dia]');
-                if (monthCell) {
-                    irParaDia(parseInt(monthCell.dataset.gotoDia));
-                    return;
-                }
-                var yearMonth = target.closest('[data-goto-mes]');
-                if (yearMonth) {
-                    irParaMes(parseInt(yearMonth.dataset.gotoMes));
-                    return;
-                }
-            });
-
-            document.addEventListener('keydown', function(e) {
-                if (e.key === 'Escape') {
-                    if ($confirmOverlay.classList.contains('is-open')) {
-                        fecharConfirm(false);
-                    } else if ($modalOverlay.classList.contains('is-open')) {
-                        fecharModal();
-                    }
-                }
-            });
         })();
     </script>
 @endsection
