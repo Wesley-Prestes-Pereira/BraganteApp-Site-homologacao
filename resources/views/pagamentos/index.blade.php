@@ -23,93 +23,532 @@
 
 @section('styles')
     <style>
-        .act-btn{display:inline-flex;align-items:center;gap:7px;height:40px;padding:0 18px;border-radius:10px;border:none;background:var(--accent);color:#fff;font-size:.84rem;font-weight:600;font-family:inherit;cursor:pointer;transition:background .15s}
-        .act-btn:hover{background:var(--accent-h)}
-        .act-btn-label{display:inline-flex;align-items:center;gap:7px;height:40px;padding:0 16px;border-radius:10px;border:1px solid var(--card-border);background:var(--card);color:var(--t3);font-size:.82rem;font-weight:600;font-family:inherit;text-decoration:none;cursor:pointer;transition:all .2s}
-        .act-btn-label:hover{color:var(--t1);border-color:var(--input-border-h)}
-
-        .p-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px}
-        .p-stat{background:var(--card);border:1px solid var(--card-border);border-radius:14px;padding:18px 20px;display:flex;align-items:center;gap:14px}
-        .p-stat__ic{width:42px;height:42px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:1rem}
-        .p-stat__val{font-size:1.3rem;font-weight:800;color:var(--t1)}
-        .p-stat__lbl{font-size:.78rem;color:var(--t3);margin-top:2px}
-
-        .p-filters{background:var(--card);border:1px solid var(--card-border);border-radius:14px;padding:16px 20px;margin-bottom:16px;display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end}
-        .p-filters .field{display:flex;flex-direction:column;gap:4px;min-width:140px}
-        .p-filters .field label{font-size:.72rem;font-weight:600;color:var(--t4);text-transform:uppercase;letter-spacing:.3px}
-        .p-filters .sdb-input,.p-filters .sdb-select{height:36px;font-size:.82rem;padding:0 10px;border-radius:8px;border:1px solid var(--input-border);background:var(--input-bg);color:var(--t1);font-family:inherit;outline:none}
-        .p-filters .sdb-input:focus,.p-filters .sdb-select:focus{border-color:var(--input-focus);box-shadow:0 0 0 3px var(--input-glow)}
-        .p-filters__actions{display:flex;gap:6px;align-items:center}
-        .p-btn-filter{height:36px;padding:0 14px;border-radius:8px;border:none;background:var(--accent);color:#fff;font-size:.8rem;font-weight:600;font-family:inherit;cursor:pointer}
-        .p-btn-clear{height:36px;width:36px;border-radius:8px;border:1px solid var(--card-border);background:transparent;color:var(--t3);cursor:pointer;display:inline-flex;align-items:center;justify-content:center;font-size:.88rem}
-
-        .p-table-wrap{background:var(--card);border:1px solid var(--card-border);border-radius:14px;overflow:hidden}
-        .p-table{width:100%;border-collapse:collapse}
-        .p-table th{padding:12px 14px;font-size:.74rem;font-weight:700;color:var(--t4);text-transform:uppercase;letter-spacing:.3px;text-align:left;border-bottom:1px solid var(--card-border);background:var(--input-bg)}
-        .p-table td{padding:12px 14px;font-size:.84rem;color:var(--t2);border-bottom:1px solid var(--card-border);vertical-align:middle}
-        .p-table tr:last-child td{border-bottom:none}
-        .p-table tr:hover td{background:var(--hover)}
-
-        .p-badge{display:inline-block;padding:3px 8px;border-radius:6px;font-size:.68rem;font-weight:700}
-        .p-badge--pagamento{background:rgba(52,211,153,.12);color:var(--success)}
-        .p-badge--credito{background:rgba(91,156,246,.12);color:var(--accent)}
-        .p-badge--debito{background:rgba(248,113,113,.12);color:var(--danger)}
-
-        .p-status{display:inline-block;padding:3px 8px;border-radius:6px;font-size:.68rem;font-weight:700}
-        .p-status--pago{background:rgba(52,211,153,.12);color:var(--success)}
-        .p-status--pendente{background:rgba(251,191,36,.12);color:var(--warning)}
-        .p-status--atrasado{background:rgba(248,113,113,.12);color:var(--danger)}
-        .p-status--cancelado{background:rgba(110,128,154,.12);color:var(--t3)}
-
-        .p-valor{font-weight:700;white-space:nowrap}
-        .p-valor--pos{color:var(--success)}
-        .p-valor--neg{color:var(--danger)}
-
-        .p-cliente{font-weight:600;color:var(--t1)}
-
-        .p-actions{display:flex;gap:4px}
-        .btn-ic{width:32px;height:32px;display:inline-flex;align-items:center;justify-content:center;border-radius:8px;border:1px solid var(--card-border);background:transparent;color:var(--t3);cursor:pointer;font-size:.78rem;transition:all .15s}
-        .btn-ic:hover{color:var(--t1);background:var(--hover)}
-        .btn-ic.danger:hover{color:var(--danger);border-color:var(--danger)}
-
-        .empty-state{text-align:center;padding:60px 20px;color:var(--t4)}
-        .empty-state i{font-size:2.5rem;margin-bottom:12px;display:block}
-
-        .modal-overlay{position:fixed;inset:0;background:var(--overlay);z-index:2000;display:none;align-items:center;justify-content:center;padding:20px}
-        .modal-overlay.is-open{display:flex}
-        .modal-box{background:var(--card);border:1px solid var(--card-border);border-radius:16px;width:100%;max-width:540px;overflow:hidden;max-height:90vh;overflow-y:auto}
-        .modal-head{padding:20px 24px 0}
-        .modal-head__title{font-size:1.1rem;font-weight:700;color:var(--t1)}
-        .modal-body{padding:20px 24px;display:flex;flex-direction:column;gap:14px}
-        .field-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-        .sdb-label{display:block;font-size:.78rem;font-weight:600;color:var(--t3);margin-bottom:6px}
-        .req{color:var(--danger)}
-        .sdb-input,.sdb-select,.sdb-textarea{width:100%;height:42px;padding:0 14px;border-radius:10px;border:1px solid var(--input-border);background:var(--input-bg);color:var(--t1);font-size:.88rem;font-family:inherit;outline:none;transition:border-color .15s,box-shadow .15s}
-        .sdb-textarea{height:80px;padding:10px 14px;resize:vertical}
-        .sdb-input:focus,.sdb-select:focus,.sdb-textarea:focus{border-color:var(--input-focus);box-shadow:0 0 0 3px var(--input-glow)}
-        .modal-foot{padding:16px 24px;display:flex;justify-content:flex-end;gap:8px;border-top:1px solid var(--card-border)}
-        .btn-cancel{height:40px;padding:0 18px;border-radius:10px;border:1px solid var(--card-border);background:transparent;color:var(--t3);font-size:.84rem;font-weight:600;font-family:inherit;cursor:pointer}
-        .btn-save{height:40px;padding:0 20px;border-radius:10px;border:none;background:var(--accent);color:#fff;font-size:.84rem;font-weight:600;font-family:inherit;cursor:pointer}
-
-        .confirm-overlay{position:fixed;inset:0;background:var(--overlay);z-index:3000;display:none;align-items:center;justify-content:center}
-        .confirm-overlay.is-open{display:flex}
-        .confirm-box{background:var(--card);border:1px solid var(--card-border);border-radius:16px;padding:30px;text-align:center;max-width:380px;width:100%}
-        .confirm-box__title{font-size:1rem;font-weight:700;color:var(--t1);margin-bottom:8px}
-        .confirm-box__msg{font-size:.84rem;color:var(--t3);margin-bottom:20px}
-        .confirm-box__actions{display:flex;gap:8px;justify-content:center}
-        .btn-danger{height:40px;padding:0 20px;border-radius:10px;border:none;background:var(--danger);color:#fff;font-size:.84rem;font-weight:600;font-family:inherit;cursor:pointer}
-
-        .p-pag{padding:16px 20px;display:flex;justify-content:center}
-        .p-pag nav{display:flex;gap:4px}
-
-        @media(max-width:768px){
-            .p-stats{grid-template-columns:repeat(2,1fr)}
-            .p-filters{flex-direction:column}
-            .p-table-wrap{overflow-x:auto}
-            .field-row{grid-template-columns:1fr}
+        .act-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            height: 40px;
+            padding: 0 18px;
+            border-radius: 10px;
+            border: none;
+            background: var(--accent);
+            color: #fff;
+            font-size: .84rem;
+            font-weight: 600;
+            font-family: inherit;
+            cursor: pointer;
+            transition: background .15s
         }
-        @media(max-width:480px){
-            .p-stats{grid-template-columns:1fr}
+
+        .act-btn:hover {
+            background: var(--accent-h)
+        }
+
+        .act-btn-label {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            height: 40px;
+            padding: 0 16px;
+            border-radius: 10px;
+            border: 1px solid var(--card-border);
+            background: var(--card);
+            color: var(--t3);
+            font-size: .82rem;
+            font-weight: 600;
+            font-family: inherit;
+            text-decoration: none;
+            cursor: pointer;
+            transition: all .2s
+        }
+
+        .act-btn-label:hover {
+            color: var(--t1);
+            border-color: var(--input-border-h)
+        }
+
+        .p-stats {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+            margin-bottom: 20px
+        }
+
+        .p-stat {
+            background: var(--card);
+            border: 1px solid var(--card-border);
+            border-radius: 14px;
+            padding: 18px 20px;
+            display: flex;
+            align-items: center;
+            gap: 14px
+        }
+
+        .p-stat__ic {
+            width: 42px;
+            height: 42px;
+            border-radius: 11px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem
+        }
+
+        .p-stat__val {
+            font-size: 1.3rem;
+            font-weight: 800;
+            color: var(--t1)
+        }
+
+        .p-stat__lbl {
+            font-size: .78rem;
+            color: var(--t3);
+            margin-top: 2px
+        }
+
+        .p-filters {
+            background: var(--card);
+            border: 1px solid var(--card-border);
+            border-radius: 14px;
+            padding: 16px 20px;
+            margin-bottom: 16px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            align-items: flex-end
+        }
+
+        .p-filters .field {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            min-width: 140px
+        }
+
+        .p-filters .field label {
+            font-size: .72rem;
+            font-weight: 600;
+            color: var(--t4);
+            text-transform: uppercase;
+            letter-spacing: .3px
+        }
+
+        .p-filters .sdb-input,
+        .p-filters .sdb-select {
+            height: 36px;
+            font-size: .82rem;
+            padding: 0 10px;
+            border-radius: 8px;
+            border: 1px solid var(--input-border);
+            background: var(--input-bg);
+            color: var(--t1);
+            font-family: inherit;
+            outline: none
+        }
+
+        .p-filters .sdb-input:focus,
+        .p-filters .sdb-select:focus {
+            border-color: var(--input-focus);
+            box-shadow: 0 0 0 3px var(--input-glow)
+        }
+
+        .p-filters__actions {
+            display: flex;
+            gap: 6px;
+            align-items: center
+        }
+
+        .p-btn-filter {
+            height: 36px;
+            padding: 0 14px;
+            border-radius: 8px;
+            border: none;
+            background: var(--accent);
+            color: #fff;
+            font-size: .8rem;
+            font-weight: 600;
+            font-family: inherit;
+            cursor: pointer
+        }
+
+        .p-btn-clear {
+            height: 36px;
+            width: 36px;
+            border-radius: 8px;
+            border: 1px solid var(--card-border);
+            background: transparent;
+            color: var(--t3);
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: .88rem
+        }
+
+        .p-table-wrap {
+            background: var(--card);
+            border: 1px solid var(--card-border);
+            border-radius: 14px;
+            overflow: hidden
+        }
+
+        .p-table {
+            width: 100%;
+            border-collapse: collapse
+        }
+
+        .p-table th {
+            padding: 12px 14px;
+            font-size: .74rem;
+            font-weight: 700;
+            color: var(--t4);
+            text-transform: uppercase;
+            letter-spacing: .3px;
+            text-align: left;
+            border-bottom: 1px solid var(--card-border);
+            background: var(--input-bg)
+        }
+
+        .p-table td {
+            padding: 12px 14px;
+            font-size: .84rem;
+            color: var(--t2);
+            border-bottom: 1px solid var(--card-border);
+            vertical-align: middle
+        }
+
+        .p-table tr:last-child td {
+            border-bottom: none
+        }
+
+        .p-table tr:hover td {
+            background: var(--hover)
+        }
+
+        .p-badge {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 6px;
+            font-size: .68rem;
+            font-weight: 700
+        }
+
+        .p-badge--pagamento {
+            background: rgba(52, 211, 153, .12);
+            color: var(--success)
+        }
+
+        .p-badge--credito {
+            background: rgba(91, 156, 246, .12);
+            color: var(--accent)
+        }
+
+        .p-badge--debito {
+            background: rgba(248, 113, 113, .12);
+            color: var(--danger)
+        }
+
+        .p-status {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 6px;
+            font-size: .68rem;
+            font-weight: 700
+        }
+
+        .p-status--pago {
+            background: rgba(52, 211, 153, .12);
+            color: var(--success)
+        }
+
+        .p-status--pendente {
+            background: rgba(251, 191, 36, .12);
+            color: var(--warning)
+        }
+
+        .p-status--atrasado {
+            background: rgba(248, 113, 113, .12);
+            color: var(--danger)
+        }
+
+        .p-status--cancelado {
+            background: rgba(110, 128, 154, .12);
+            color: var(--t3)
+        }
+
+        .p-valor {
+            font-weight: 700;
+            white-space: nowrap
+        }
+
+        .p-valor--pos {
+            color: var(--success)
+        }
+
+        .p-valor--neg {
+            color: var(--danger)
+        }
+
+        .p-cliente {
+            font-weight: 600;
+            color: var(--t1)
+        }
+
+        .p-actions {
+            display: flex;
+            gap: 4px
+        }
+
+        .btn-ic {
+            width: 32px;
+            height: 32px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+            border: 1px solid var(--card-border);
+            background: transparent;
+            color: var(--t3);
+            cursor: pointer;
+            font-size: .78rem;
+            transition: all .15s
+        }
+
+        .btn-ic:hover {
+            color: var(--t1);
+            background: var(--hover)
+        }
+
+        .btn-ic.danger:hover {
+            color: var(--danger);
+            border-color: var(--danger)
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--t4)
+        }
+
+        .empty-state i {
+            font-size: 2.5rem;
+            margin-bottom: 12px;
+            display: block
+        }
+
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: var(--overlay);
+            z-index: 2000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 20px
+        }
+
+        .modal-overlay.is-open {
+            display: flex
+        }
+
+        .modal-box {
+            background: var(--card);
+            border: 1px solid var(--card-border);
+            border-radius: 16px;
+            width: 100%;
+            max-width: 540px;
+            overflow: hidden;
+            max-height: 90vh;
+            overflow-y: auto
+        }
+
+        .modal-head {
+            padding: 20px 24px 0
+        }
+
+        .modal-head__title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--t1)
+        }
+
+        .modal-body {
+            padding: 20px 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 14px
+        }
+
+        .field-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px
+        }
+
+        .sdb-label {
+            display: block;
+            font-size: .78rem;
+            font-weight: 600;
+            color: var(--t3);
+            margin-bottom: 6px
+        }
+
+        .req {
+            color: var(--danger)
+        }
+
+        .sdb-input,
+        .sdb-select,
+        .sdb-textarea {
+            width: 100%;
+            height: 42px;
+            padding: 0 14px;
+            border-radius: 10px;
+            border: 1px solid var(--input-border);
+            background: var(--input-bg);
+            color: var(--t1);
+            font-size: .88rem;
+            font-family: inherit;
+            outline: none;
+            transition: border-color .15s, box-shadow .15s
+        }
+
+        .sdb-textarea {
+            height: 80px;
+            padding: 10px 14px;
+            resize: vertical
+        }
+
+        .sdb-input:focus,
+        .sdb-select:focus,
+        .sdb-textarea:focus {
+            border-color: var(--input-focus);
+            box-shadow: 0 0 0 3px var(--input-glow)
+        }
+
+        .modal-foot {
+            padding: 16px 24px;
+            display: flex;
+            justify-content: flex-end;
+            gap: 8px;
+            border-top: 1px solid var(--card-border)
+        }
+
+        .btn-cancel {
+            height: 40px;
+            padding: 0 18px;
+            border-radius: 10px;
+            border: 1px solid var(--card-border);
+            background: transparent;
+            color: var(--t3);
+            font-size: .84rem;
+            font-weight: 600;
+            font-family: inherit;
+            cursor: pointer
+        }
+
+        .btn-save {
+            height: 40px;
+            padding: 0 20px;
+            border-radius: 10px;
+            border: none;
+            background: var(--accent);
+            color: #fff;
+            font-size: .84rem;
+            font-weight: 600;
+            font-family: inherit;
+            cursor: pointer
+        }
+
+        .confirm-overlay {
+            position: fixed;
+            inset: 0;
+            background: var(--overlay);
+            z-index: 3000;
+            display: none;
+            align-items: center;
+            justify-content: center
+        }
+
+        .confirm-overlay.is-open {
+            display: flex
+        }
+
+        .confirm-box {
+            background: var(--card);
+            border: 1px solid var(--card-border);
+            border-radius: 16px;
+            padding: 30px;
+            text-align: center;
+            max-width: 380px;
+            width: 100%
+        }
+
+        .confirm-box__title {
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--t1);
+            margin-bottom: 8px
+        }
+
+        .confirm-box__msg {
+            font-size: .84rem;
+            color: var(--t3);
+            margin-bottom: 20px
+        }
+
+        .confirm-box__actions {
+            display: flex;
+            gap: 8px;
+            justify-content: center
+        }
+
+        .btn-danger {
+            height: 40px;
+            padding: 0 20px;
+            border-radius: 10px;
+            border: none;
+            background: var(--danger);
+            color: #fff;
+            font-size: .84rem;
+            font-weight: 600;
+            font-family: inherit;
+            cursor: pointer
+        }
+
+        .p-pag {
+            padding: 16px 20px;
+            display: flex;
+            justify-content: center
+        }
+
+        .p-pag nav {
+            display: flex;
+            gap: 4px
+        }
+
+        @media(max-width:768px) {
+            .p-stats {
+                grid-template-columns: repeat(2, 1fr)
+            }
+
+            .p-filters {
+                flex-direction: column
+            }
+
+            .p-table-wrap {
+                overflow-x: auto
+            }
+
+            .field-row {
+                grid-template-columns: 1fr
+            }
+        }
+
+        @media(max-width:480px) {
+            .p-stats {
+                grid-template-columns: 1fr
+            }
         }
     </style>
 @endsection
@@ -117,28 +556,32 @@
 @section('content')
     <div class="p-stats">
         <div class="p-stat">
-            <div class="p-stat__ic" style="background:rgba(52,211,153,.15);color:var(--success)"><i class="fi fi-rr-check-circle"></i></div>
+            <div class="p-stat__ic" style="background:rgba(52,211,153,.15);color:var(--success)"><i
+                    class="fi fi-rr-check-circle"></i></div>
             <div>
                 <div class="p-stat__val">R$ {{ number_format($stats['total_pago'], 2, ',', '.') }}</div>
                 <div class="p-stat__lbl">Total Pago</div>
             </div>
         </div>
         <div class="p-stat">
-            <div class="p-stat__ic" style="background:rgba(251,191,36,.15);color:var(--warning)"><i class="fi fi-rr-time-half-past"></i></div>
+            <div class="p-stat__ic" style="background:rgba(251,191,36,.15);color:var(--warning)"><i
+                    class="fi fi-rr-time-half-past"></i></div>
             <div>
                 <div class="p-stat__val">R$ {{ number_format($stats['total_pendente'], 2, ',', '.') }}</div>
                 <div class="p-stat__lbl">Pendente</div>
             </div>
         </div>
         <div class="p-stat">
-            <div class="p-stat__ic" style="background:rgba(91,156,246,.15);color:var(--accent)"><i class="fi fi-rr-arrow-down"></i></div>
+            <div class="p-stat__ic" style="background:rgba(91,156,246,.15);color:var(--accent)"><i
+                    class="fi fi-rr-arrow-down"></i></div>
             <div>
                 <div class="p-stat__val">R$ {{ number_format($stats['total_creditos'], 2, ',', '.') }}</div>
                 <div class="p-stat__lbl">Créditos</div>
             </div>
         </div>
         <div class="p-stat">
-            <div class="p-stat__ic" style="background:rgba(248,113,113,.15);color:var(--danger)"><i class="fi fi-rr-arrow-up"></i></div>
+            <div class="p-stat__ic" style="background:rgba(248,113,113,.15);color:var(--danger)"><i
+                    class="fi fi-rr-arrow-up"></i></div>
             <div>
                 <div class="p-stat__val">R$ {{ number_format($stats['total_debitos'], 2, ',', '.') }}</div>
                 <div class="p-stat__lbl">Débitos</div>
@@ -152,7 +595,8 @@
             <select name="cliente_id" class="sdb-select">
                 <option value="">Todos</option>
                 @foreach ($clientes as $c)
-                    <option value="{{ $c->id }}" {{ request('cliente_id') == $c->id ? 'selected' : '' }}>{{ $c->nome }}</option>
+                    <option value="{{ $c->id }}" {{ request('cliente_id') == $c->id ? 'selected' : '' }}>
+                        {{ $c->nome }}</option>
                 @endforeach
             </select>
         </div>
@@ -185,7 +629,8 @@
         </div>
         <div class="p-filters__actions">
             <button type="submit" class="p-btn-filter"><i class="fi fi-rr-search"></i></button>
-            <a href="{{ route('pagamentos.index') }}" class="p-btn-clear" title="Limpar"><i class="fi fi-rr-cross-small"></i></a>
+            <a href="{{ route('pagamentos.index') }}" class="p-btn-clear" title="Limpar"><i
+                    class="fi fi-rr-cross-small"></i></a>
         </div>
     </form>
 
@@ -221,7 +666,8 @@
                                     R$ {{ number_format((float) $p->valor, 2, ',', '.') }}
                                 </span>
                             </td>
-                            <td><span class="p-status p-status--{{ strtolower($p->status) }}">{{ $p->status }}</span></td>
+                            <td><span class="p-status p-status--{{ strtolower($p->status) }}">{{ $p->status }}</span>
+                            </td>
                             <td>{{ $p->forma_pagamento ?? '—' }}</td>
                             <td>{{ $p->referencia_mes ?? '—' }}</td>
                             <td>{{ $p->data_vencimento ? $p->data_vencimento->format('d/m/Y') : '—' }}</td>
@@ -235,7 +681,8 @@
                                         </button>
                                     @endcan
                                     @can('financeiro.excluir')
-                                        <button class="btn-ic danger" onclick="confirmarExclusao({{ $p->id }})" title="Excluir">
+                                        <button class="btn-ic danger" onclick="confirmarExclusao({{ $p->id }})"
+                                            title="Excluir">
                                             <i class="fi fi-rr-trash"></i>
                                         </button>
                                     @endcan
@@ -280,7 +727,8 @@
                 <div class="field-row">
                     <div>
                         <label class="sdb-label">Valor <span class="req">*</span></label>
-                        <input type="number" id="pag-valor" class="sdb-input" step="0.01" min="0.01" placeholder="0,00">
+                        <input type="number" id="pag-valor" class="sdb-input" step="0.01" min="0.01"
+                            placeholder="0,00">
                     </div>
                     <div>
                         <label class="sdb-label">Status <span class="req">*</span></label>
@@ -351,7 +799,10 @@
             destroy: '{{ route('pagamentos.destroy', ':id') }}'
         };
 
-        var modalState = { editing: false, id: null };
+        var modalState = {
+            editing: false,
+            id: null
+        };
         var deleteId = null;
 
         function abrirModal(pag) {
@@ -394,26 +845,30 @@
                 obs: document.getElementById('pag-obs').value.trim() || null
             };
 
-            var url = modalState.editing ? ROUTES.update.replace(':id', modalState.id) : ROUTES.store;
-            var method = modalState.editing ? 'PUT' : 'POST';
-
-            fetch(url, {
-                method: method,
-                headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrfToken, 'Accept': 'application/json' },
-                body: JSON.stringify(payload)
-            })
-            .then(function(r) { if (!r.ok) return r.json().then(function(e) { throw e; }); return r.json(); })
-            .then(function() {
-                fecharModal();
-                SdbToast.success(modalState.editing ? 'Registro atualizado' : 'Registro criado');
-                setTimeout(function() { window.location.reload(); }, 800);
-            })
-            .catch(function(err) {
-                btn.disabled = false;
-                var msg = err.message || 'Erro ao salvar.';
-                if (err.errors) msg = Object.values(err.errors).flat().join('\n');
-                SdbToast.error(msg);
-            });
+            fetchApi(modalState.editing ? ROUTES.update.replace(':id', modalState.id) : ROUTES.store, {
+                    method: modalState.editing ? 'PUT' : 'POST',
+                    body: JSON.stringify(payload)
+                })
+                .then(function() {
+                    fecharModal();
+                    SdbToast.success(modalState.editing ? 'Registro atualizado' : 'Registro criado');
+                    setTimeout(function() {
+                        window.location.reload();
+                    }, 800);
+                })
+                .catch(function(err) {
+                    btn.disabled = false;
+                    if (err.status === 422) {
+                        err.json().then(function(data) {
+                            SdbToast.error(Object.values(data.errors || {}).flat().join(', ') || data.message ||
+                                'Dados inválidos');
+                        });
+                    } else if (err.status === 403) {
+                        SdbToast.error('Sem permissão para esta ação');
+                    } else {
+                        SdbToast.error('Erro ao salvar registro');
+                    }
+                });
         }
 
         function confirmarExclusao(id) {
@@ -428,20 +883,26 @@
 
         function executarExclusao() {
             if (!deleteId) return;
-            fetch(ROUTES.destroy.replace(':id', deleteId), {
-                method: 'DELETE',
-                headers: { 'X-CSRF-TOKEN': csrfToken, 'Accept': 'application/json' }
-            })
-            .then(function(r) { if (!r.ok) return r.json().then(function(e) { throw e; }); return r.json(); })
-            .then(function(data) {
-                fecharConfirm();
-                SdbToast.success(data.message);
-                setTimeout(function() { window.location.reload(); }, 800);
-            })
-            .catch(function(err) {
-                fecharConfirm();
-                SdbToast.error(err.message || 'Erro ao excluir.');
-            });
+            fetchApi(ROUTES.destroy.replace(':id', deleteId), {
+                    method: 'DELETE'
+                })
+                .then(function(data) {
+                    fecharConfirm();
+                    SdbToast.success(data.message);
+                    setTimeout(function() {
+                        window.location.reload();
+                    }, 800);
+                })
+                .catch(function(err) {
+                    fecharConfirm();
+                    if (err.status === 422) {
+                        err.json().then(function(data) {
+                            SdbToast.error(data.message || 'Erro ao excluir.');
+                        });
+                    } else {
+                        SdbToast.error('Erro ao excluir.');
+                    }
+                });
         }
     </script>
 @endsection

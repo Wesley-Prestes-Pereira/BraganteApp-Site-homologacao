@@ -480,21 +480,24 @@
 @section('content')
     <div class="c-stats">
         <div class="c-stat">
-            <div class="c-stat__ic" style="background:rgba(91,156,246,.15);color:var(--accent)"><i class="fi fi-rr-users"></i></div>
+            <div class="c-stat__ic" style="background:rgba(91,156,246,.15);color:var(--accent)"><i
+                    class="fi fi-rr-users"></i></div>
             <div>
                 <div class="c-stat__val">{{ $totalClientes }}</div>
                 <div class="c-stat__lbl">Total</div>
             </div>
         </div>
         <div class="c-stat">
-            <div class="c-stat__ic" style="background:rgba(52,211,153,.15);color:var(--success)"><i class="fi fi-rr-check-circle"></i></div>
+            <div class="c-stat__ic" style="background:rgba(52,211,153,.15);color:var(--success)"><i
+                    class="fi fi-rr-check-circle"></i></div>
             <div>
                 <div class="c-stat__val">{{ $ativos }}</div>
                 <div class="c-stat__lbl">Ativos</div>
             </div>
         </div>
         <div class="c-stat">
-            <div class="c-stat__ic" style="background:rgba(248,113,113,.15);color:var(--danger)"><i class="fi fi-rr-ban"></i></div>
+            <div class="c-stat__ic" style="background:rgba(248,113,113,.15);color:var(--danger)"><i
+                    class="fi fi-rr-ban"></i></div>
             <div>
                 <div class="c-stat__val">{{ $inativos }}</div>
                 <div class="c-stat__lbl">Inativos</div>
@@ -505,7 +508,8 @@
     <div class="c-search">
         <div class="c-search__wrap">
             <i class="fi fi-rr-search c-search__icon"></i>
-            <input type="text" class="c-search__input" id="buscaCliente" placeholder="Buscar por nome, telefone, email..." oninput="filtrarClientes()">
+            <input type="text" class="c-search__input" id="buscaCliente"
+                placeholder="Buscar por nome, telefone, email..." oninput="filtrarClientes()">
         </div>
     </div>
 
@@ -517,7 +521,8 @@
     @else
         <div class="c-grid" id="clientesGrid">
             @foreach ($clientes as $cliente)
-                <div class="c-card {{ $cliente->ativo ? '' : 'c-card--inactive' }}" data-search="{{ strtolower($cliente->nome . ' ' . $cliente->telefone . ' ' . $cliente->email . ' ' . $cliente->cpf) }}">
+                <div class="c-card {{ $cliente->ativo ? '' : 'c-card--inactive' }}"
+                    data-search="{{ strtolower($cliente->nome . ' ' . $cliente->telefone . ' ' . $cliente->email . ' ' . $cliente->cpf) }}">
                     <div class="c-card__top">
                         <div class="c-card__avatar">{{ strtoupper(substr($cliente->nome, 0, 2)) }}</div>
                         <div>
@@ -525,7 +530,8 @@
                             <div class="c-card__sub">
                                 <span class="c-card__reservas">
                                     <i class="fi fi-rr-list"></i>
-                                    {{ $cliente->reservas_count }} {{ $cliente->reservas_count === 1 ? 'reserva' : 'reservas' }}
+                                    {{ $cliente->reservas_count }}
+                                    {{ $cliente->reservas_count === 1 ? 'reserva' : 'reservas' }}
                                 </span>
                             </div>
                         </div>
@@ -553,7 +559,8 @@
                             </button>
                         @endcan
                         @can('clientes.excluir')
-                            <button class="btn-ic danger" onclick="confirmarExclusao({{ $cliente->id }}, '{{ $cliente->nome }}')" title="Excluir">
+                            <button class="btn-ic danger"
+                                onclick="confirmarExclusao({{ $cliente->id }}, '{{ $cliente->nome }}')" title="Excluir">
                                 <i class="fi fi-rr-trash"></i>
                             </button>
                         @endcan
@@ -620,7 +627,10 @@
             destroy: '{{ route('clientes.destroy', ':id') }}'
         };
 
-        var modalState = { editing: false, id: null };
+        var modalState = {
+            editing: false,
+            id: null
+        };
         var deleteId = null;
 
         function abrirModal(cliente) {
@@ -655,39 +665,51 @@
                 obs: document.getElementById('cli-obs').value.trim() || null
             };
 
-            var url = modalState.editing ? ROUTES.update.replace(':id', modalState.id) : ROUTES.store;
-            var method = modalState.editing ? 'PUT' : 'POST';
-
-            fetch(url, {
-                method: method,
-                headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrfToken, 'Accept': 'application/json' },
-                body: JSON.stringify(payload)
-            })
-            .then(function(r) { if (!r.ok) return r.json().then(function(e) { throw e; }); return r.json(); })
-            .then(function() {
-                fecharModal();
-                SdbToast.success(modalState.editing ? 'Cliente atualizado' : 'Cliente cadastrado');
-                setTimeout(function() { window.location.reload(); }, 800);
-            })
-            .catch(function(err) {
-                btn.disabled = false;
-                var msg = err.message || 'Erro ao salvar.';
-                if (err.errors) msg = Object.values(err.errors).flat().join('\n');
-                SdbToast.error(msg);
-            });
+            fetchApi(modalState.editing ? ROUTES.update.replace(':id', modalState.id) : ROUTES.store, {
+                    method: modalState.editing ? 'PUT' : 'POST',
+                    body: JSON.stringify(payload)
+                })
+                .then(function() {
+                    fecharModal();
+                    SdbToast.success(modalState.editing ? 'Cliente atualizado' : 'Cliente cadastrado');
+                    setTimeout(function() {
+                        window.location.reload();
+                    }, 800);
+                })
+                .catch(function(err) {
+                    btn.disabled = false;
+                    if (err.status === 422) {
+                        err.json().then(function(data) {
+                            SdbToast.error(Object.values(data.errors || {}).flat().join(', ') || data.message ||
+                                'Dados inválidos');
+                        });
+                    } else if (err.status === 403) {
+                        SdbToast.error('Sem permissão para esta ação');
+                    } else {
+                        SdbToast.error('Erro ao salvar cliente');
+                    }
+                });
         }
 
         function toggleStatus(id) {
-            fetch(ROUTES.toggle.replace(':id', id), {
-                method: 'PATCH',
-                headers: { 'X-CSRF-TOKEN': csrfToken, 'Accept': 'application/json' }
-            })
-            .then(function(r) { if (!r.ok) return r.json().then(function(e) { throw e; }); return r.json(); })
-            .then(function(data) {
-                SdbToast.success(data.message);
-                setTimeout(function() { window.location.reload(); }, 600);
-            })
-            .catch(function(err) { SdbToast.error(err.message || 'Erro ao alterar status.'); });
+            fetchApi(ROUTES.toggle.replace(':id', id), {
+                    method: 'PATCH'
+                })
+                .then(function(data) {
+                    SdbToast.success(data.message);
+                    setTimeout(function() {
+                        window.location.reload();
+                    }, 600);
+                })
+                .catch(function(err) {
+                    if (err.status === 422) {
+                        err.json().then(function(data) {
+                            SdbToast.error(data.message || 'Erro ao alterar status.');
+                        });
+                    } else {
+                        SdbToast.error('Erro ao alterar status.');
+                    }
+                });
         }
 
         function confirmarExclusao(id, nome) {
@@ -703,20 +725,26 @@
 
         function executarExclusao() {
             if (!deleteId) return;
-            fetch(ROUTES.destroy.replace(':id', deleteId), {
-                method: 'DELETE',
-                headers: { 'X-CSRF-TOKEN': csrfToken, 'Accept': 'application/json' }
-            })
-            .then(function(r) { if (!r.ok) return r.json().then(function(e) { throw e; }); return r.json(); })
-            .then(function(data) {
-                fecharConfirm();
-                SdbToast.success(data.message);
-                setTimeout(function() { window.location.reload(); }, 800);
-            })
-            .catch(function(err) {
-                fecharConfirm();
-                SdbToast.error(err.message || 'Erro ao excluir.');
-            });
+            fetchApi(ROUTES.destroy.replace(':id', deleteId), {
+                    method: 'DELETE'
+                })
+                .then(function(data) {
+                    fecharConfirm();
+                    SdbToast.success(data.message);
+                    setTimeout(function() {
+                        window.location.reload();
+                    }, 800);
+                })
+                .catch(function(err) {
+                    fecharConfirm();
+                    if (err.status === 422) {
+                        err.json().then(function(data) {
+                            SdbToast.error(data.message || 'Erro ao excluir.');
+                        });
+                    } else {
+                        SdbToast.error('Erro ao excluir.');
+                    }
+                });
         }
 
         function filtrarClientes() {

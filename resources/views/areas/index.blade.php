@@ -823,7 +823,6 @@
 
 @section('scripts')
     <script>
-        var CSRF = '{{ csrf_token() }}';
         var ROUTES = {
             porTipo: '{{ route('areas.porTipo', ':id') }}',
             tipoStore: '{{ route('tipos-area.store') }}',
@@ -1014,28 +1013,13 @@
             var btn = document.getElementById('btnSalvar');
             btn.disabled = true;
 
-            var url = modalState.editing ?
-                ROUTES.tipoUpdate.replace(':id', modalState.id) :
-                ROUTES.tipoStore;
-
-            fetch(url, {
+            fetchApi(modalState.editing ? ROUTES.tipoUpdate.replace(':id', modalState.id) : ROUTES.tipoStore, {
                     method: modalState.editing ? 'PUT' : 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': CSRF,
-                        'Accept': 'application/json'
-                    },
                     body: JSON.stringify({
                         nome: nome,
                         icone: modalState.icone,
                         cor: modalState.cor
                     })
-                })
-                .then(function(r) {
-                    if (!r.ok) return r.json().then(function(e) {
-                        throw e;
-                    });
-                    return r.json();
                 })
                 .then(function() {
                     fecharModal();
@@ -1046,9 +1030,14 @@
                 })
                 .catch(function(err) {
                     btn.disabled = false;
-                    var msg = err.message || 'Erro ao salvar tipo.';
-                    if (err.errors) msg = Object.values(err.errors).flat().join('\n');
-                    SdbToast.error(msg);
+                    if (err.status === 422) {
+                        err.json().then(function(data) {
+                            SdbToast.error(Object.values(data.errors || {}).flat().join(', ') || data.message ||
+                                'Erro ao salvar tipo.');
+                        });
+                    } else {
+                        SdbToast.error('Erro ao salvar tipo.');
+                    }
                 });
         }
 
@@ -1077,18 +1066,8 @@
         }
 
         function executarToggle(id) {
-            fetch(ROUTES.tipoToggle.replace(':id', id), {
-                    method: 'PATCH',
-                    headers: {
-                        'X-CSRF-TOKEN': CSRF,
-                        'Accept': 'application/json'
-                    }
-                })
-                .then(function(r) {
-                    if (!r.ok) return r.json().then(function(e) {
-                        throw e;
-                    });
-                    return r.json();
+            fetchApi(ROUTES.tipoToggle.replace(':id', id), {
+                    method: 'PATCH'
                 })
                 .then(function(data) {
                     fecharConfirm();
@@ -1097,8 +1076,8 @@
                         location.reload();
                     }, 1200);
                 })
-                .catch(function(err) {
-                    SdbToast.error(err.message || 'Erro ao alterar status.');
+                .catch(function() {
+                    SdbToast.error('Erro ao alterar status.');
                 });
         }
 
@@ -1126,18 +1105,8 @@
         }
 
         function executarExcluir(id) {
-            fetch(ROUTES.tipoDestroy.replace(':id', id), {
-                    method: 'DELETE',
-                    headers: {
-                        'X-CSRF-TOKEN': CSRF,
-                        'Accept': 'application/json'
-                    }
-                })
-                .then(function(r) {
-                    if (!r.ok) return r.json().then(function(e) {
-                        throw e;
-                    });
-                    return r.json();
+            fetchApi(ROUTES.tipoDestroy.replace(':id', id), {
+                    method: 'DELETE'
                 })
                 .then(function(data) {
                     fecharConfirm();
@@ -1147,7 +1116,13 @@
                     }, 1200);
                 })
                 .catch(function(err) {
-                    SdbToast.error(err.message || 'Erro ao excluir.');
+                    if (err.status === 422) {
+                        err.json().then(function(data) {
+                            SdbToast.error(data.message || 'Erro ao excluir.');
+                        });
+                    } else {
+                        SdbToast.error('Erro ao excluir.');
+                    }
                 });
         }
 

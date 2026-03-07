@@ -1116,7 +1116,6 @@
 
 @section('scripts')
     <script>
-        var CSRF = '{{ csrf_token() }}';
         var TIPO_ID = {{ $tipo->id }};
         var ROUTES = {
             store: '{{ route('areas.store') }}',
@@ -1517,23 +1516,9 @@
                 payload.config_dias = getConfigDias();
             }
 
-            var url = modalState.editing ? ROUTES.update.replace(':id', modalState.id) : ROUTES.store;
-            var method = modalState.editing ? 'PUT' : 'POST';
-
-            fetch(url, {
-                    method: method,
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': CSRF,
-                        'Accept': 'application/json'
-                    },
+            fetchApi(modalState.editing ? ROUTES.update.replace(':id', modalState.id) : ROUTES.store, {
+                    method: modalState.editing ? 'PUT' : 'POST',
                     body: JSON.stringify(payload)
-                })
-                .then(function(r) {
-                    if (!r.ok) return r.json().then(function(e) {
-                        throw e;
-                    });
-                    return r.json();
                 })
                 .then(function() {
                     fecharModal();
@@ -1544,12 +1529,20 @@
                 })
                 .catch(function(err) {
                     btn.disabled = false;
-                    var msg = err.message || 'Erro ao salvar área.';
-                    if (err.errors) {
-                        var keys = Object.keys(err.errors);
-                        msg = err.errors[keys[0]][0];
+                    if (err.status === 422) {
+                        err.json().then(function(data) {
+                            var msg = data.message || 'Erro ao salvar área.';
+                            if (data.errors) {
+                                var keys = Object.keys(data.errors);
+                                msg = data.errors[keys[0]][0];
+                            }
+                            SdbToast.error(msg);
+                        });
+                    } else if (err.status === 403) {
+                        SdbToast.error('Sem permissão para esta ação');
+                    } else {
+                        SdbToast.error('Erro ao salvar área.');
                     }
-                    SdbToast.error(msg);
                 });
         }
 
@@ -1578,18 +1571,8 @@
         }
 
         function executarToggle(id) {
-            fetch(ROUTES.toggle.replace(':id', id), {
-                    method: 'PATCH',
-                    headers: {
-                        'X-CSRF-TOKEN': CSRF,
-                        'Accept': 'application/json'
-                    }
-                })
-                .then(function(r) {
-                    if (!r.ok) return r.json().then(function(e) {
-                        throw e;
-                    });
-                    return r.json();
+            fetchApi(ROUTES.toggle.replace(':id', id), {
+                    method: 'PATCH'
                 })
                 .then(function(data) {
                     fecharConfirm();
@@ -1598,8 +1581,8 @@
                         location.reload();
                     }, 1200);
                 })
-                .catch(function(err) {
-                    SdbToast.error(err.message || 'Erro ao alterar status.');
+                .catch(function() {
+                    SdbToast.error('Erro ao alterar status.');
                 });
         }
 
@@ -1622,18 +1605,8 @@
         }
 
         function executarExcluir(id) {
-            fetch(ROUTES.destroy.replace(':id', id), {
-                    method: 'DELETE',
-                    headers: {
-                        'X-CSRF-TOKEN': CSRF,
-                        'Accept': 'application/json'
-                    }
-                })
-                .then(function(r) {
-                    if (!r.ok) return r.json().then(function(e) {
-                        throw e;
-                    });
-                    return r.json();
+            fetchApi(ROUTES.destroy.replace(':id', id), {
+                    method: 'DELETE'
                 })
                 .then(function(data) {
                     fecharConfirm();
@@ -1643,7 +1616,13 @@
                     }, 1200);
                 })
                 .catch(function(err) {
-                    SdbToast.error(err.message || 'Erro ao excluir.');
+                    if (err.status === 422) {
+                        err.json().then(function(data) {
+                            SdbToast.error(data.message || 'Erro ao excluir.');
+                        });
+                    } else {
+                        SdbToast.error('Erro ao excluir.');
+                    }
                 });
         }
 

@@ -369,21 +369,24 @@
 @section('content')
     <div class="t-stats">
         <div class="t-stat">
-            <div class="t-stat__ic" style="background:rgba(91,156,246,.15);color:var(--accent)"><i class="fi fi-rr-dollar"></i></div>
+            <div class="t-stat__ic" style="background:rgba(91,156,246,.15);color:var(--accent)"><i
+                    class="fi fi-rr-dollar"></i></div>
             <div>
                 <div class="t-stat__val">{{ $total }}</div>
                 <div class="t-stat__lbl">Total</div>
             </div>
         </div>
         <div class="t-stat">
-            <div class="t-stat__ic" style="background:rgba(52,211,153,.15);color:var(--success)"><i class="fi fi-rr-check-circle"></i></div>
+            <div class="t-stat__ic" style="background:rgba(52,211,153,.15);color:var(--success)"><i
+                    class="fi fi-rr-check-circle"></i></div>
             <div>
                 <div class="t-stat__val">{{ $ativas }}</div>
                 <div class="t-stat__lbl">Ativas</div>
             </div>
         </div>
         <div class="t-stat">
-            <div class="t-stat__ic" style="background:rgba(248,113,113,.15);color:var(--danger)"><i class="fi fi-rr-ban"></i></div>
+            <div class="t-stat__ic" style="background:rgba(248,113,113,.15);color:var(--danger)"><i
+                    class="fi fi-rr-ban"></i></div>
             <div>
                 <div class="t-stat__val">{{ $inativas }}</div>
                 <div class="t-stat__lbl">Inativas</div>
@@ -402,7 +405,8 @@
                 <div class="t-card {{ $taxa->ativo ? '' : 't-card--inactive' }}">
                     <div class="t-card__top">
                         <div class="t-card__nome">{{ $taxa->nome }}</div>
-                        <span class="t-card__badge t-card__badge--{{ strtolower($taxa->tipo_cobranca) }}">{{ $taxa->tipo_cobranca }}</span>
+                        <span
+                            class="t-card__badge t-card__badge--{{ strtolower($taxa->tipo_cobranca) }}">{{ $taxa->tipo_cobranca }}</span>
                     </div>
                     <div class="t-card__valor">
                         @if ($taxa->tipo_cobranca === 'PERCENTUAL')
@@ -423,7 +427,8 @@
                             </button>
                         @endcan
                         @can('taxas.excluir')
-                            <button class="btn-ic danger" onclick="confirmarExclusao({{ $taxa->id }}, '{{ $taxa->nome }}')" title="Excluir">
+                            <button class="btn-ic danger"
+                                onclick="confirmarExclusao({{ $taxa->id }}, '{{ $taxa->nome }}')" title="Excluir">
                                 <i class="fi fi-rr-trash"></i>
                             </button>
                         @endcan
@@ -445,7 +450,8 @@
                 </div>
                 <div>
                     <label class="sdb-label">Valor <span class="req">*</span></label>
-                    <input type="number" id="taxa-valor" class="sdb-input" step="0.01" min="0.01" placeholder="0,00">
+                    <input type="number" id="taxa-valor" class="sdb-input" step="0.01" min="0.01"
+                        placeholder="0,00">
                 </div>
                 <div>
                     <label class="sdb-label">Tipo de Cobrança <span class="req">*</span></label>
@@ -483,7 +489,10 @@
             destroy: '{{ route('taxas.destroy', ':id') }}'
         };
 
-        var modalState = { editing: false, id: null };
+        var modalState = {
+            editing: false,
+            id: null
+        };
         var deleteId = null;
 
         function abrirModal(taxa) {
@@ -514,39 +523,51 @@
                 tipo_cobranca: document.getElementById('taxa-tipo').value
             };
 
-            var url = modalState.editing ? ROUTES.update.replace(':id', modalState.id) : ROUTES.store;
-            var method = modalState.editing ? 'PUT' : 'POST';
-
-            fetch(url, {
-                method: method,
-                headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrfToken, 'Accept': 'application/json' },
-                body: JSON.stringify(payload)
-            })
-            .then(function(r) { if (!r.ok) return r.json().then(function(e) { throw e; }); return r.json(); })
-            .then(function() {
-                fecharModal();
-                SdbToast.success(modalState.editing ? 'Taxa atualizada' : 'Taxa criada');
-                setTimeout(function() { window.location.reload(); }, 800);
-            })
-            .catch(function(err) {
-                btn.disabled = false;
-                var msg = err.message || 'Erro ao salvar.';
-                if (err.errors) msg = Object.values(err.errors).flat().join('\n');
-                SdbToast.error(msg);
-            });
+            fetchApi(modalState.editing ? ROUTES.update.replace(':id', modalState.id) : ROUTES.store, {
+                    method: modalState.editing ? 'PUT' : 'POST',
+                    body: JSON.stringify(payload)
+                })
+                .then(function() {
+                    fecharModal();
+                    SdbToast.success(modalState.editing ? 'Taxa atualizada' : 'Taxa criada');
+                    setTimeout(function() {
+                        window.location.reload();
+                    }, 800);
+                })
+                .catch(function(err) {
+                    btn.disabled = false;
+                    if (err.status === 422) {
+                        err.json().then(function(data) {
+                            SdbToast.error(Object.values(data.errors || {}).flat().join(', ') || data.message ||
+                                'Dados inválidos');
+                        });
+                    } else if (err.status === 403) {
+                        SdbToast.error('Sem permissão para esta ação');
+                    } else {
+                        SdbToast.error('Erro ao salvar taxa');
+                    }
+                });
         }
 
         function toggleStatus(id) {
-            fetch(ROUTES.toggle.replace(':id', id), {
-                method: 'PATCH',
-                headers: { 'X-CSRF-TOKEN': csrfToken, 'Accept': 'application/json' }
-            })
-            .then(function(r) { if (!r.ok) return r.json().then(function(e) { throw e; }); return r.json(); })
-            .then(function(data) {
-                SdbToast.success(data.message);
-                setTimeout(function() { window.location.reload(); }, 600);
-            })
-            .catch(function(err) { SdbToast.error(err.message || 'Erro ao alterar status.'); });
+            fetchApi(ROUTES.toggle.replace(':id', id), {
+                    method: 'PATCH'
+                })
+                .then(function(data) {
+                    SdbToast.success(data.message);
+                    setTimeout(function() {
+                        window.location.reload();
+                    }, 600);
+                })
+                .catch(function(err) {
+                    if (err.status === 422) {
+                        err.json().then(function(data) {
+                            SdbToast.error(data.message || 'Erro ao alterar status.');
+                        });
+                    } else {
+                        SdbToast.error('Erro ao alterar status.');
+                    }
+                });
         }
 
         function confirmarExclusao(id, nome) {
@@ -562,20 +583,26 @@
 
         function executarExclusao() {
             if (!deleteId) return;
-            fetch(ROUTES.destroy.replace(':id', deleteId), {
-                method: 'DELETE',
-                headers: { 'X-CSRF-TOKEN': csrfToken, 'Accept': 'application/json' }
-            })
-            .then(function(r) { if (!r.ok) return r.json().then(function(e) { throw e; }); return r.json(); })
-            .then(function(data) {
-                fecharConfirm();
-                SdbToast.success(data.message);
-                setTimeout(function() { window.location.reload(); }, 800);
-            })
-            .catch(function(err) {
-                fecharConfirm();
-                SdbToast.error(err.message || 'Erro ao excluir.');
-            });
+            fetchApi(ROUTES.destroy.replace(':id', deleteId), {
+                    method: 'DELETE'
+                })
+                .then(function(data) {
+                    fecharConfirm();
+                    SdbToast.success(data.message);
+                    setTimeout(function() {
+                        window.location.reload();
+                    }, 800);
+                })
+                .catch(function(err) {
+                    fecharConfirm();
+                    if (err.status === 422) {
+                        err.json().then(function(data) {
+                            SdbToast.error(data.message || 'Erro ao excluir.');
+                        });
+                    } else {
+                        SdbToast.error('Erro ao excluir.');
+                    }
+                });
         }
     </script>
 @endsection

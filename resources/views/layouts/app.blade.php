@@ -1152,6 +1152,26 @@
     <script>
         var csrfToken = document.querySelector('meta[name="csrf-token"]').content;
 
+        function fetchApi(url, opts) {
+            opts = opts || {};
+            opts.headers = Object.assign({
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': csrfToken,
+                'Accept': 'application/json'
+            }, opts.headers || {});
+            return fetch(url, opts).then(function(r) {
+                if (!r.ok) {
+                    var err = new Error('HTTP ' + r.status);
+                    err.status = r.status;
+                    err.json = function() {
+                        return r.json();
+                    };
+                    throw err;
+                }
+                return r.json();
+            });
+        }
+
         (function() {
             applyTheme(localStorage.getItem('sdb-theme') || 'dark');
             var t = document.getElementById('themeToggle');
