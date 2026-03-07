@@ -18,6 +18,16 @@ class DashboardController extends Controller
         'DOMINGO' => 'Dom',
     ];
 
+    private const DIA_CARBON = [
+        'DOMINGO' => Carbon::SUNDAY,
+        'SEGUNDA' => Carbon::MONDAY,
+        'TERCA'   => Carbon::TUESDAY,
+        'QUARTA'  => Carbon::WEDNESDAY,
+        'QUINTA'  => Carbon::THURSDAY,
+        'SEXTA'   => Carbon::FRIDAY,
+        'SABADO'  => Carbon::SATURDAY,
+    ];
+
     private const TODOS = ['SEGUNDA', 'TERCA', 'QUARTA', 'QUINTA', 'SEXTA', 'SABADO', 'DOMINGO'];
     private const SEMANA = ['SEGUNDA', 'TERCA', 'QUARTA', 'QUINTA', 'SEXTA'];
     private const FDS = ['SABADO', 'DOMINGO'];
@@ -75,15 +85,11 @@ class DashboardController extends Controller
     {
         return Cache::tags(Reserva::CACHE_TAG)->remember('dashboard:stats', 120, function () {
             $hoje = Carbon::today();
-            $diaSemana = array_search($hoje->dayOfWeek, [
-                'DOMINGO' => Carbon::SUNDAY,
-                'SEGUNDA' => Carbon::MONDAY,
-                'TERCA'   => Carbon::TUESDAY,
-                'QUARTA'  => Carbon::WEDNESDAY,
-                'QUINTA'  => Carbon::THURSDAY,
-                'SEXTA'   => Carbon::FRIDAY,
-                'SABADO'  => Carbon::SATURDAY,
-            ]) ?: 'SEGUNDA';
+
+            $diaSemana = array_search($hoje->dayOfWeek, self::DIA_CARBON);
+            if ($diaSemana === false) {
+                $diaSemana = 'SEGUNDA';
+            }
 
             $reservas = Reserva::query();
             $totalReservas = (clone $reservas)->count();

@@ -16,6 +16,8 @@ class HistoricoController extends Controller
 {
     private const CACHE_TAG = 'historico';
 
+    private const EXPORT_LIMIT = 5000;
+
     private const HIDDEN_FIELDS = [
         'remember_token',
         'password',
@@ -88,19 +90,19 @@ class HistoricoController extends Controller
     ];
 
     private const MODEL_LABELS = [
-        'App\\Models\\Reserva'          => 'Reserva',
-        'App\\Models\\User'             => 'Usuário',
-        'App\\Models\\Area'             => 'Área',
-        'App\\Models\\Cliente'          => 'Cliente',
-        'App\\Models\\Taxa'             => 'Taxa',
-        'App\\Models\\AreaValor'        => 'Valor de Área',
-        'App\\Models\\Pagamento'        => 'Pagamento',
-        'App\\Models\\TipoArea'         => 'Tipo de Área',
-        'App\\Models\\AreaHorario'      => 'Horário de Área',
+        'App\\Models\\Reserva'           => 'Reserva',
+        'App\\Models\\User'              => 'Usuário',
+        'App\\Models\\Area'              => 'Área',
+        'App\\Models\\Cliente'           => 'Cliente',
+        'App\\Models\\Taxa'              => 'Taxa',
+        'App\\Models\\AreaValor'         => 'Valor de Área',
+        'App\\Models\\Pagamento'         => 'Pagamento',
+        'App\\Models\\TipoArea'          => 'Tipo de Área',
+        'App\\Models\\AreaHorario'       => 'Horário de Área',
         'App\\Models\\AreaDiaDisponivel' => 'Dia Disponível',
-        'App\\Models\\'         => 'Taxa de Área',
-        'App\\Models\\ReservaTaxa'      => 'Taxa de Reserva',
-        'App\\Models\\Recurso'          => 'Área',
+        'App\\Models\\AreaTaxa'          => 'Taxa de Área',
+        'App\\Models\\ReservaTaxa'       => 'Taxa de Reserva',
+        'App\\Models\\Recurso'           => 'Área',
     ];
 
     private const EVENT_LABELS = [
@@ -121,17 +123,27 @@ class HistoricoController extends Controller
 
     public function index(Request $request)
     {
+        $request->validate([
+            'modelo'     => 'nullable|string',
+            'evento'     => 'nullable|in:created,updated,deleted,restored',
+            'usuario_id' => 'nullable|integer|exists:users,id',
+            'data_inicio' => 'nullable|date',
+            'data_fim'    => 'nullable|date|after_or_equal:data_inicio',
+            'busca'       => 'nullable|string|max:191',
+            'export'      => 'nullable|in:xlsx,pdf',
+        ]);
+
         $query = $this->buildQuery($request);
 
         if ($request->export === 'xlsx') {
             return Excel::download(
-                new AuditsExport($query->get()->map(fn($a) => $this->processAudit($a))),
+                new AuditsExport($query->limit(self::EXPORT_LIMIT)->get()->map(fn($a) => $this->processAudit($a))),
                 'historico_' . now()->format('Y-m-d_His') . '.xlsx',
             );
         }
 
         if ($request->export === 'pdf') {
-            return $this->exportPdf($query->get());
+            return $this->exportPdf($query->limit(self::EXPORT_LIMIT)->get());
         }
 
         $audits = $query->paginate(25)->through(fn($a) => $this->processAudit($a));
@@ -191,15 +203,15 @@ class HistoricoController extends Controller
         }
 
         if ($request->filled('usuario_id')) {
-            $query->where('user_id', $request->usuario_id);
+            $query->where('user_id', $request->integer('usuario_id'));
         }
 
         if ($request->filled('data_inicio')) {
-            $query->where('created_at', '>=', Carbon::parse($request->data_inicio)->startOfDay());
+            $query->where('created_at', '>=', $request->date('data_inicio')->startOfDay());
         }
 
         if ($request->filled('data_fim')) {
-            $query->where('created_at', '<=', Carbon::parse($request->data_fim)->endOfDay());
+            $query->where('created_at', '<=', $request->date('data_fim')->endOfDay());
         }
 
         if ($request->filled('busca')) {
@@ -434,11 +446,11 @@ class HistoricoController extends Controller
     {
         $processed = $audits->map(fn($a) => $this->processAudit($a));
         $html = view('historico.pdf', [
-            'audits'       => $processed,
-            'totalCriados' => $processed->where('event', 'created')->count(),
-            'totalEditados' => $processed->where('event', 'updated')->count(),
-            'totalExcluidos' => $processed->where('event', 'deleted')->count(),
-            'totalRestaurados' => $processed->where('event', 'restored')->count(),
+            'audits'            => $processed,
+            'totalCriados'      => $processed->where('event', 'created')->count(),
+            'totalEditados'     => $processed->where('event', 'updated')->count(),
+            'totalExcluidos'    => $processed->where('event', 'deleted')->count(),
+            'totalRestaurados'  => $processed->where('event', 'restored')->count(),
         ])->render();
 
         $dompdf = new Dompdf(['isRemoteEnabled' => false]);
